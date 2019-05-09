@@ -114,6 +114,9 @@ function drawModal() {
     // hide .mainPageButtonContainer and filters divs
     $(".mainPageButtonContainer").addClass("hide");
 }
+
+
+
 // In Cart:
 $(".cartModal").click(function(event) {
     var target = event.target;
@@ -124,7 +127,7 @@ $(".cartModal").click(function(event) {
             "</div>";
         $(this).find(".modal-content").html(successHtml)
     } else {
-        // if c;ient want to delete current product item
+        // if client want to delete product item from cart
         if ($(target).is(".removeCartItemButton")) {
             var itemToDelete = $(target).parent();
             var nameToDelete = $(itemToDelete).find(".cartItemName").text();
@@ -172,6 +175,7 @@ $(".cartModal").click(function(event) {
         }
     }
 })
+
 
 function drawAuthModal() {
     var authHtml = "<div class=\"inputsData\">" +
