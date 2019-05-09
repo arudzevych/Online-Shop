@@ -65,6 +65,19 @@ function addToSession(productData) {
 
 
 function toggleCart() {
+
+    //save every product amount to sessionStorage
+    $(".cartProducts .cartProduct").each(function() {
+        var name = $(this).find(".cartItemName").text();
+        var amount = $(this).find(".cartItemQuantity").val();
+        // exactly save current pruduct amount to sassionStorage:
+        var itemJSON = sessionStorage.getItem(name);
+        var item = JSON.parse(itemJSON);
+        item.push(amount);
+        sessionStorage.setItem(item[0], JSON.stringify(item));
+    });
+
+
     cartModal.classList.toggle("show-modal");
     // show .mainPageButtonContainer and .filters divs
     $(".mainPageButtonContainer").removeClass("hide");
@@ -91,6 +104,8 @@ function drawModal() {
         var amount = item[1];
         var expirationDate = item[2];
         var meal_href = item[3]
+        var clientAmount = item[4];
+        if (clientAmount == undefined) clientAmount = 1;
         cartHtml += "<div class=\"cartProduct\">";
         // cartHtml += "<div class=\"imgContainer\">" +
         //     image +
@@ -99,7 +114,8 @@ function drawModal() {
         cartHtml += "<p>" + amount + "</p>";
         cartHtml += "<p>" + expirationDate + "</p>";
         cartHtml += "<button class=removeCartItemButton type=button>видалити</button>";
-        cartHtml += "<input class=cartItmQuantity type=number value=1 min=1 max=1000></input>";
+        cartHtml += "<br>";
+        cartHtml += "<input class=\"cartItemQuantity\" type=\"number\" value=\"" + clientAmount + "\" min=\"1\" max=\"1000\"></input>";
         cartHtml += "</div>";
         //     });
     }
