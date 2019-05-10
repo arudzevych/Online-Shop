@@ -130,7 +130,7 @@ $(".addEditModal").click(function(event) {
                 // call to POST
                 $.ajax({
                     // url:"http://"+host+"/cloud-api/meals",
-                    url: "http://" + host + ":8080/meals",
+                    url: "http://" + host + ":8080/cloud-api/meals",
                     headers: {
                         'Content-Type': 'application/json'
                     },

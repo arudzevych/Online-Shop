@@ -8,7 +8,7 @@ function uploadContent() {
         //   // тут замість app/selectFrom.php напиши адресу до свого серверу 
         //   // (що буде повертати адресу картинки у форматі json)
         // url:"http://"+host+"/cloud-api/meals",
-        url: "http://" + host + ":8080/meals",
+        url: "http://" + host + ":8080/cloud-api/meals",
 
         type: "GET",
         crossDomain: true,
@@ -28,14 +28,6 @@ function uploadContent() {
 }
 
 function displayContent(content) {
-    // imagesHtml = "<b>meals:<ul>";
-    // dataArray.forEach(function(item, index, dataArray) {
-    //     imagesHtml += "<li>" + item + "</li>";
-    // });
-    // imagesHtml += "</ul></b>"
-    //     // test-mages - is our class in index.html div 
-    // $(".test-div").html(imagesHtml);
-
 
     // =============================
     if (content[0] != null) {
@@ -109,7 +101,7 @@ $(".addEditModal").click(function(event) {
         // call to addEditProduct.php
         $.ajax({
             // url:"http://"+host+"/cloud-api/meals",
-            url: "http://" + host + ":8080/meals",
+            url: "http://" + host + ":8080/cloud-api/meals",
             headers: {
                 'Content-Type': 'application/json'
             },

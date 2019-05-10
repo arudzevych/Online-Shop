@@ -1,4 +1,6 @@
-// cart modal
+// main content array variable
+host = window.location.hostname
+    // cart modal
 var cartModal = document.querySelector(".cartModal");
 var closeCartButton = document.querySelector(".cartModal .close-button");
 var showCartButton = document.querySelector(".showCartButton");
@@ -130,9 +132,6 @@ function drawModal() {
     // hide .mainPageButtonContainer and filters divs
     $(".mainPageButtonContainer").addClass("hide");
 }
-
-
-
 // In Cart:
 $(".cartModal").click(function(event) {
     var target = event.target;
@@ -143,7 +142,7 @@ $(".cartModal").click(function(event) {
             "</div>";
         $(this).find(".modal-content").html(successHtml)
     } else {
-        // if client want to delete product item from cart
+        // if c;ient want to delete current product item
         if ($(target).is(".removeCartItemButton")) {
             var itemToDelete = $(target).parent();
             var nameToDelete = $(itemToDelete).find(".cartItemName").text();
@@ -192,13 +191,12 @@ $(".cartModal").click(function(event) {
     }
 })
 
-
 function drawAuthModal() {
     var authHtml = "<div class=\"inputsData\">" +
         "<span>логін:</span>" +
-        "<input class=\"inputData login\" type=\"text\" value=\"ваш логін\">" +
+        "<input class=\"inputData login\" type=\"text\" value=\"admin\">" +
         "<span>пароль:</span>" +
-        "<input class=\"inputData password\" type=\"text\" value=\"ваш пароль\">" +
+        "<input class=\"inputData password\" type=\"text\" value=\"admin\">" +
         "</div>";
 
     authHtml += "<div class=\"checkoutContainer\">" +
@@ -216,7 +214,27 @@ function drawAuthModal() {
 closeCartButton.addEventListener("click", toggleCart);
 closeAuthButton.addEventListener("click", toggleAuth);
 showCartButton.addEventListener("click", OpenCart);
-showAuthButton.addEventListener("click", OpenAuth);
+// showAuthButton.addEventListener("click", OpenAuth);
+$(showAuthButton).click(function(event) {
+    var loginState = checkLoginStateCookie();
+    if (!loginState) {
+        OpenAuth();
+    } else {
+        // if user wants to logouts
+        // send logout request
+        $.ajax({
+            // url:"http://"+host+"/cloud-api/meals",
+            url: "http://" + host + ":8080/cloud-api/logout",
+            type: 'GET',
+            success: function(data) {
+                performLoginState();
+                // window.open('admin.html');
+
+            }
+        })
+    }
+
+});
 
 // end cart modal<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 // checkout modal:
@@ -226,29 +244,137 @@ function toggleCheckout() {
     $(".mainPageButtonContainer").removeClass("hide");
 }
 
-// if user press .sign_inButton 
+// authModal if user press .sign_inButton 
 $(".authModal").click(function(event) {
     var myModal = this;
     var target = event.target;
     if ($(target).is(".sign_inButton")) {
+
+        // if user wants to login:
         var userName = $(myModal).find(".login").val();
         var userPassword = $(myModal).find(".password").val();
-        // open products array in cart
+        // send login request
         $.ajax({
-            url: 'app/login.php',
-            data: {
-                'userName': userName,
-                'userPassword': userPassword,
+            // url:"http://"+host+"/cloud-api/meals",
+            url: "http://" + host + ":8080/cloud-api/login",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + btoa(userName + ":" + userPassword));
             },
-            type: 'POST',
+            type: 'GET',
             success: function(data) {
-                // var successHtml=
-                // "<div class=\"successContainer\">"+
-                // "<div class=\"row2\">Ваше замовленя відпрвлено до наших менеджерів.</div>"+
-                // "<div class=\"row3\">Дякуємо за увагу до нашого магазину! :)</div>"+
-                // "</div>";
-                // $(".checkoutModal .modal-content").html(successHtml);
+                performLoginState();
+                if (userName == "admin") { window.open('admin.html'); }
             }
         })
     }
 });
+// let's change authButton and sessionStorage
+function performLoginState() {
+    // var state = sessionStorage.getItem("loginState");
+    var state = checkLoginStateCookie();
+    // if user perform succesfuly logout
+    if (state == true) {
+        deleteCookie("loginState");
+        // setCookie("loginState", "false");
+        // sessionStorage.setItem("loginState", false);
+        var showAuthButton = 'вхід<i class="fas fa-sign-in-alt"></i>';
+        $(".showAuthButton").html(showAuthButton);
+
+        // if user perform login
+    } else {
+
+        setCookie("loginState", "true");
+        var showAuthButton = '<i class="fas fa-sign-out-alt"></i>вихід';
+        $(".showAuthButton").html(showAuthButton);
+    }
+}
+
+function checkLoginStateCookie() {
+    // var state = sessionStorage.getItem("loginState");
+    var state = getCookie("loginState");
+    // unlogged
+    if (state == undefined) {
+        var showAuthButton = 'вхід<i class="fas fa-sign-in-alt"></i>';
+        $(".showAuthButton").html(showAuthButton);
+        return false;
+        // logged
+    } else {
+        var showAuthButton = '<i class="fas fa-sign-out-alt"></i>вихід';
+        $(".showAuthButton").html(showAuthButton);
+        return true;
+    }
+}
+
+// function checkLoginState() {
+//     // call to POST
+//     $.ajax({
+//         // url:"http://"+host+"/cloud-api/meals",
+//         url: "http://" + host + ":8080/cloud-api/meals",
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         data: null,
+//         type: "POST",
+//         crossDomain: true,
+//         success: function() {
+//             // close modal
+//             // addEditModal.classList.toggle("show-modal");
+//             // refresh products
+//             // uploadProducts();
+//         },
+//         error: function(XMLHttpRequest, textStatus, errorThrown) {
+//             // alert("Status: " + XMLHttpRequest.status);
+//             if (XMLHttpRequest.status == "400") {
+//                 alert("logged");
+//             } else {
+//                 alert("unlogged");
+//             }
+//         }
+//     })
+
+// }
+// set cookie
+function setCookie(name, value, options) {
+    options = options || {};
+
+    var expires = options.expires;
+
+    if (typeof expires == "number" && expires) {
+        var d = new Date();
+        d.setTime(d.getTime() + expires * 1000);
+        expires = options.expires = d;
+    }
+    if (expires && expires.toUTCString) {
+        options.expires = expires.toUTCString();
+    }
+
+    value = encodeURIComponent(value);
+
+    var updatedCookie = name + "=" + value;
+
+    for (var propName in options) {
+        updatedCookie += "; " + propName;
+        var propValue = options[propName];
+        if (propValue !== true) {
+            updatedCookie += "=" + propValue;
+        }
+    }
+
+    document.cookie = updatedCookie;
+}
+// возвращает cookie с именем name, если есть, если нет, то undefined
+function getCookie(name) {
+    var matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+function deleteCookie(name, path, domain) {
+    if (getCookie(name)) {
+        document.cookie = name + "=" +
+            ((path) ? ";path=" + path : "") +
+            ((domain) ? ";domain=" + domain : "") +
+            ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    }
+}

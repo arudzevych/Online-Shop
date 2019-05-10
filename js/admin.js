@@ -7,7 +7,7 @@ function uploadProducts() {
         //   // тут замість app/selectFrom.php напиши адресу до свого серверу 
         //   // (що буде повертати адресу картинки у форматі json)
         // url:"http://"+host+"/cloud-api/meals",
-        url: "http://" + host + ":8080/meals",
+        url: "http://" + host + ":8080/cloud-api/meals",
 
         type: "GET",
         crossDomain: true,
@@ -40,10 +40,20 @@ function displayAdminContent(content) {
             // content[i].image+
             // "</div>";
             // productManagerHtml+=" <p class=\"code\">"+codes[i]+"</p>";
+
+            var name = content[i].name;
+            var meal_href = content[i]._links.self.href;
+
+            var mealsStartIndex = meal_href.indexOf("meals");
+            var indexToInsert = mealsStartIndex - 1;
+            // var hostEndIndex = hostStartIndex + host.length;
+            var result_meal_href = meal_href.splice(indexToInsert, 0, "/cloud-api");
+
+
             productManagerHtml += " <p class=\"name\">" + content[i].name + "</p>";
             productManagerHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
             productManagerHtml += " <p class=\"expirationDate\">" + content[i].expirationDate + "</p>";
-            productManagerHtml += " <p class=\"meal_href hide\">" + content[i]._links.self.href + "</p>";
+            productManagerHtml += " <p class=\"meal_href hide\">" + result_meal_href + "</p>";
             productManagerHtml += " </div>";
             if ((counter % countInRow - (countInRow - 1)) == 0) { //than end of new row
                 productManagerHtml += "</div>";
@@ -57,3 +67,7 @@ function displayAdminContent(content) {
         $(".productManager").html(productManagerHtml);
     }
 }
+// for inserting substring into string 
+String.prototype.splice = function(idx, rem, str) {
+    return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
+};
