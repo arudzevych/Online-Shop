@@ -176,7 +176,7 @@ textarea {
     width: 40vw;
 }
 
-@media screen and (min-width: 1200px) {
+@media screen and (min-width: 1020px) {
     /*1024px*/
     .close-button {
         float: right;

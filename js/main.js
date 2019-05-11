@@ -7,7 +7,7 @@ function uploadContent() {
     $.ajax({
         //   // тут замість app/selectFrom.php напиши адресу до свого серверу 
         //   // (що буде повертати адресу картинки у форматі json)
-        // url:"http://"+host+"/cloud-api/meals",
+        // url: "http://" + host + "/cloud-api/meals",
         url: "http://" + host + ":8080/cloud-api/meals",
 
         type: "GET",
@@ -100,7 +100,7 @@ $(".addEditModal").click(function(event) {
         var productDataArray = collectProductData();
         // call to addEditProduct.php
         $.ajax({
-            // url:"http://"+host+"/cloud-api/meals",
+            // url: "http://" + host + "/cloud-api/meals",
             url: "http://" + host + ":8080/cloud-api/meals",
             headers: {
                 'Content-Type': 'application/json'
