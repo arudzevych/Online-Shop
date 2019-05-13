@@ -61,6 +61,8 @@ function displayAdminContent(content) {
             productManagerHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
             productManagerHtml += " <p class=\"expirationDate\">" + content[i].expirationDate + "</p>";
             productManagerHtml += " <p class=\"meal_href hide\">" + result_meal_href + "</p>";
+            productManagerHtml += " <p class=\"price\">" + content[i].price + "</p>";
+            productManagerHtml += " <p class=\"discount hide\">" + content[i].discount + "</p>";
             productManagerHtml += " <p class=\"ingredients hide\">" + result_ingredients_href + "</p>";
             productManagerHtml += " </div>";
             if ((counter % countInRow - (countInRow - 1)) == 0) { //than end of new row

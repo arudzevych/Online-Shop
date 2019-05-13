@@ -27,46 +27,42 @@ $(".addProduct").click(function() {
 
 function EditProduct(product) {
     if (product != undefined) {
+        // product data object
+        var productData = {};
+
         // product
         // var prodImage = $(product).find("img")[0].outerHTML;
-        var prodName = $(product).find(".name").text();
-        var prodAmount = $(product).find(".amount").text();
-        var prodExpirationDate = $(product).find(".expirationDate").text();
-        var meal_href = $(product).find(".meal_href").text();
-        var ingredients_href = $(product).find(".ingredients").text();
-
-        // store product data to array:
-        var productData = [prodName, prodAmount, prodExpirationDate, meal_href, ingredients_href];
+        productData["name"] = $(product).find(".name").text();
+        productData["amount"] = $(product).find(".amount").text();
+        productData["expirationDate"] = $(product).find(".expirationDate").text();
+        productData["meal_href"] = $(product).find(".meal_href").text();
+        productData["price"] = $(product).find(".price").text()
+        productData["discount"] = $(product).find(".discount").text()
+        productData["igredients"] = $(product).find(".ingredients").text();
 
         drawAdminModal(productData);
     }
 }
 
 function AddProduct() {
-    // set all parameters to ""
-    // var prodImage = "";
-    var prodName = "";
-    var prodAmount = "";
-    var prodExpirationDate = "";
-    // store product data to array:
-    var productData = [prodName, prodAmount, prodExpirationDate];
+    // product data object
+    var productData = {};
+
+    productData["name"] = "";
+    productData["amount"] = "";
+    productData["expirationDate"] = "";
+    productData["meal_href"] = undefined;
+    productData["price"] = "";
+    productData["discount"] = "";
+
 
     drawAdminModal(productData);
 }
 
 function drawAdminModal(productData) {
-    // main variables of this function
-    // array of chracteristics
-    var ingredientsArray = [];
+
     // html text that i paste to appropriate textarea
-    var ingredientsHtml = " ";
-    // collact prodact data
-    // var image = productData[0];
-    var name = productData[0];
-    var amount = productData[1];
-    var expirationDate = productData[2];
-    var meal_href = productData[3];
-    var ingredients = productData[4];
+    var ingredients = productData["ingredients"];
 
     if (ingredients != undefined) {
         // let's get ingredients:
@@ -93,9 +89,9 @@ function drawAdminModal(productData) {
                 //     // error occurs usually when characteristics=="";
                 // }
                 ingredientsHtml = ingredientsArray.join("\n");
-
+                productData["ingredients"] = ingredientsArray.join("\n");
                 // let's draw modalAdminHtml
-                var managerModalHtml = drawExactlyAdminModalHtml(name, amount, expirationDate, meal_href, ingredientsHtml)
+                var managerModalHtml = drawExactlyAdminModalHtml(productData);
 
                 $(".addEditModal .modal-content").html(managerModalHtml);
                 // show modal
@@ -103,8 +99,9 @@ function drawAdminModal(productData) {
             }
         });
     } else {
+        productData["ingredients"] = "";
         // let's draw modalAdminHtml
-        var managerModalHtml = drawExactlyAdminModalHtml(name, amount, expirationDate, meal_href, ingredientsHtml)
+        var managerModalHtml = drawExactlyAdminModalHtml(productData);
 
         $(".addEditModal .modal-content").html(managerModalHtml);
         // show modal
@@ -112,7 +109,7 @@ function drawAdminModal(productData) {
     }
 }
 
-function drawExactlyAdminModalHtml(name, amount, expirationDate, meal_href, ingredientsHtml) {
+function drawExactlyAdminModalHtml(productData) {
     // image that manager can paste to DB
     var managerModalHtml = "";
     //  managerModalHtml+= "<span>зображення товару:</span>";
@@ -121,15 +118,20 @@ function drawExactlyAdminModalHtml(name, amount, expirationDate, meal_href, ingr
     //     "</div>"; //end of imgContainer
     managerModalHtml += "<div class=\"inputsData\">" +
         "<span>назва товару:</span>" +
-        "<input class=\"inputData productName\" type=\"text\" value=\"" + name + "\">" +
+        "<input class=\"inputData productName\" type=\"text\" value=\"" + productData.name + "\">" +
         "<span>к-ть товару:</span>" +
-        "<input class=\"inputData productAmount\" type=\"text\" value=\"" + amount + "\">" +
+        "<input class=\"inputData productAmount\" type=\"text\" value=\"" + productData.amount + "\">" +
         "<span>строк придатності:</span>" +
-        "<input class=\"inputData productExpirationDate\" type=\"text\" value=\"" + expirationDate + "\">" +
-        "<input class=\"inputData meal_href hide\" type=\"text\" value=\"" + meal_href + "\">" +
+        "<input class=\"inputData productExpirationDate\" type=\"text\" value=\"" + productData.expirationDate + "\">" +
+        "<input class=\"inputData meal_href hide\" type=\"text\" value=\"" + productData.meal_href + "\">" +
+        "<span>ціна:</span>" +
+        "<input class=\"inputData productPrice\" type=\"text\" value=\"" + productData.price + "\">" +
+        "<span>знижка:</span>" +
+        "<input class=\"inputData productDiscount\" type=\"text\" value=\"" + productData.discount + "\">" +
+
         // ingredients
         "<span>Інгредієнти:</span>" +
-        "<textarea class=\"productIngredients\" rows=\"4\">" + ingredientsHtml + "</textarea>" +
+        "<textarea class=\"productIngredients\" rows=\"4\">" + productData.ingredients + "</textarea>" +
 
         "</div>";
 
@@ -146,25 +148,29 @@ $(".addEditModal").click(function(event) {
         if ($(target).is(".save")) {
 
             // manager clicks eectly on save button
-            var productDataArray = collectProductData();
-            var buffArr = [];
-            productDataArray.forEach(function(element) {
+            var productData = collectProductData();
+
+            var buffObj = {}
+
+            Object.keys(productData).forEach(function(item) {
+                var element = productData[item];
                 if (element == "") element = null
-                buffArr.push(element)
+                buffObj[item] = element;
             });
-            productDataArray = buffArr;
-            if (productDataArray[3] != "undefined") {
+
+            productData = buffObj;
+            if (productData.meal_href != "undefined") {
                 // call to PUT
                 $.ajax({
-                    url: productDataArray[3],
+                    url: productData.meal_href,
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     data: JSON.stringify({
-                        "name": productDataArray[0],
-                        "amount": productDataArray[1],
-                        "discount": null,
-                        "price": null,
+                        "name": productData.name,
+                        "amount": productData.amount,
+                        "discount": productData.discount,
+                        "price": productData.price,
                         "expirationDate": null,
                         "ingredients": null,
                     }),
@@ -186,12 +192,12 @@ $(".addEditModal").click(function(event) {
                         'Content-Type': 'application/json'
                     },
                     data: JSON.stringify({
-                        "name": productDataArray[0],
-                        "amount": productDataArray[1],
-                        "discount": null,
-                        "price": null,
-                        "expirationDate": productDataArray[2],
-                        "ingredients": JSON.parse(productDataArray[4]),
+                        "name": productData.name,
+                        "amount": productData.amount,
+                        "discount": productData.discount,
+                        "price": productData.price,
+                        "expirationDate": productData.expirationDate,
+                        "ingredients": JSON.parse(productData.ingredients),
                     }),
                     type: "POST",
                     crossDomain: true,
@@ -206,12 +212,12 @@ $(".addEditModal").click(function(event) {
         }
         if ($(target).is(".delete")) {
             // manager clicks eectly on save button
-            var productDataArray = collectProductData();
+            var productData = collectProductData();
             // call to addEditProduct.php
             $.ajax({
-                url: productDataArray[3],
+                url: productData.meal_href,
                 data: {
-                    "name": productDataArray[3],
+                    "name": productData.name,
                 },
                 type: "DELETE",
                 success: function() {
@@ -226,29 +232,25 @@ $(".addEditModal").click(function(event) {
     // collect product input data
 function collectProductData() {
     // output array
-    var productArray = [];
+    var productData = {};
+    productData["name"] = $(".addEditModal").find(".productName").val();
+    productData["amount"] = $(".addEditModal").find(".productAmount").val();
+    productData["expirationDate"] = $(".addEditModal").find(".productExpirationDate").val();
+    productData["meal_href"] = $(".addEditModal").find(".meal_href").val();
+    productData["price"] = $(".addEditModal").find(".productPrice").val();
+    productData["discount"] = $(".addEditModal").find(".productDiscount").val();
 
-    // var prodImage = $(".addEditModal").find("img")[0].outerHTML;
-    var prodName = $(".addEditModal").find(".productName").val();
-    var prodAmount = $(".addEditModal").find(".productAmount").val();
-    var prodExpirationDate = $(".addEditModal").find(".productExpirationDate").val();
-    var meal_href = $(".addEditModal").find(".meal_href").val();
     // only inicizlyze product characteristics
     var prodIngredients = [];
     var prodIngredientsString = $(".addEditModal").find(".productIngredients").val();
     // collect product charackteristics into array
     prodIngredients = prodIngredientsString.split("\n");
 
-    prodIngredientsJSON = JSON.stringify(prodIngredients);
-    // productArray.push(prodImage);
-    productArray.push(prodName);
-    productArray.push(prodAmount);
-    productArray.push(prodExpirationDate);
-    productArray.push(meal_href);
-    productArray.push(prodIngredientsJSON);
+    productData["ingredients"] = JSON.stringify(prodIngredients);
+
 
     // return output productArray data
-    return productArray;
+    return productData;
 }
 
 $(closeaddEditButton).click(function() {

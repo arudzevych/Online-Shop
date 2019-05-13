@@ -307,6 +307,8 @@ $(".authModal").click(function(event) {
             type: 'GET',
             success: function(data) {
                 performLoginState();
+                // close modal
+                toggleAuth();
                 if (userName == "admin") { window.open('admin.html'); }
             }
         })
@@ -435,8 +437,8 @@ $(".signUpModal").click(function(event) {
 
         // call to POST
         $.ajax({
-            // url: "http://" + host + "/cloud-api/registration",
-            url: "http://" + host + ":8080/cloud-api/registration",
+            url: "http://" + host + "/cloud-api/registration",
+            // url: "http://" + host + ":8080/cloud-api/registration",
             headers: {
                 'Content-Type': 'application/json'
             },

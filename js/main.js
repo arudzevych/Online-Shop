@@ -54,6 +54,15 @@ function displayContent(content) {
             productHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
             productHtml += " <p class=\"expirationDate\">" + content[i].expirationDate + "</p>";
             productHtml += " <p class=\"meal_href hide\">" + content[i]._links.self.href + "</p>";
+            if (content[i].discount != null)
+                productHtml += " <p class=\"discount \" title='знижка'>" +
+
+                "<span class=\"fa-stack fa-lg\">" +
+                "<i class=\"fa fa-certificate fa-stack-2x\"></i>" +
+                "<i class=\"fa fa-tag fa-stack-1x fa-inverse\"></i>" +
+                "</span> " +
+                "<span class=\"discountExactly\">" + content[i].discount + "</span> % </p>";
+            productHtml += " <p class=\"price\" title='ціна за шт'>" + content[i].price + "</p>";
 
             //   productHtml+=" <p class=\"price\">"+prices[i]+"</p>";
             //   productHtml+=" <p class=\"characteristics\" hidden>"+characteristics[i]+"</p>"
