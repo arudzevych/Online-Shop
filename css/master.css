@@ -99,6 +99,14 @@ margin-left: auto;
     border: 2px solid #ff4d00;
 }
 
+.oldPrice {
+    text-decoration: line-through
+}
+
+.newPrice {
+    color: #ff4d00;
+}
+
 button {
     border: none;
     background-color: #b5d6e0;
