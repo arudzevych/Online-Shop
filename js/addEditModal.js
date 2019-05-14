@@ -96,6 +96,7 @@ function drawAdminModal(productData) {
                 $(".addEditModal .modal-content").html(managerModalHtml);
                 // show modal
                 addEditModal.classList.toggle("show-modal");
+                datePicker();
             }
         });
     } else {
@@ -106,7 +107,17 @@ function drawAdminModal(productData) {
         $(".addEditModal .modal-content").html(managerModalHtml);
         // show modal
         addEditModal.classList.toggle("show-modal");
+        datePicker();
+
     }
+}
+
+function datePicker() {
+    var minDate = new Date();
+    $("#datepicker").datepicker({
+        dateFormat: 'dd.mm.yy',
+        minDate: minDate,
+    });
 }
 
 function drawExactlyAdminModalHtml(productData) {
@@ -118,11 +129,13 @@ function drawExactlyAdminModalHtml(productData) {
     //     "</div>"; //end of imgContainer
     managerModalHtml += "<div class=\"inputsData\">" +
         "<span>назва товару:</span>" +
-        "<input class=\"inputData productName\" type=\"text\" value=\"" + productData.name + "\">" +
+        "<input class=\"inputData productName\" type=\"text\" value=\"" + productData.name + "\"required>" +
         "<span>к-ть товару:</span>" +
         "<input class=\"inputData productAmount\" type=\"text\" value=\"" + productData.amount + "\">" +
         "<span>строк придатності:</span>" +
-        "<input class=\"inputData productExpirationDate\" type=\"text\" value=\"" + productData.expirationDate + "\">" +
+        "<input type=\"text\" id=\"datepicker\">" +
+        // '<input type="date" id="datepicker" data-date-inline-picker="true" onselect=getChosenDate min=' + dateString + '/>' +
+        productData.expirationDate +
         "<input class=\"inputData meal_href hide\" type=\"text\" value=\"" + productData.meal_href + "\">" +
         "<span>ціна:</span>" +
         "<input class=\"inputData productPrice\" type=\"text\" value=\"" + productData.price + "\">" +
@@ -141,13 +154,15 @@ function drawExactlyAdminModalHtml(productData) {
         "</div>";
     return managerModalHtml;
 }
+
+
 // when manager click on save button
 $(".addEditModal").click(function(event) {
         // var myModal=this;
         var target = event.target;
         if ($(target).is(".save")) {
 
-            // manager clicks eectly on save button
+            // manager clicks exectly on save button
             var productData = collectProductData();
 
             var buffObj = {}
@@ -171,7 +186,7 @@ $(".addEditModal").click(function(event) {
                         "amount": productData.amount,
                         "discount": productData.discount,
                         "price": productData.price,
-                        "expirationDate": null,
+                        "expirationDate": productData.expirationDate,
                         "ingredients": null,
                     }),
                     type: "PUT",
@@ -229,13 +244,29 @@ $(".addEditModal").click(function(event) {
             })
         }
     })
+
+    
+
+function convertToTimestamp(expiryDate) {
+    var splitedExpiryDate = expiryDate.split(".");
+    var year = splitedExpiryDate[2];
+    var month = splitedExpiryDate[1];
+    var day = splitedExpiryDate[0];
+    var myDate = new Date(year, month, day);
+    var timestamp = myDate.getTime();
+    console.log(timestamp);
+    return timestamp;
+};
+
     // collect product input data
 function collectProductData() {
     // output array
     var productData = {};
     productData["name"] = $(".addEditModal").find(".productName").val();
     productData["amount"] = $(".addEditModal").find(".productAmount").val();
-    productData["expirationDate"] = $(".addEditModal").find(".productExpirationDate").val();
+    var expiryDate = $(".addEditModal").find("#datepicker").val();
+    productData["expirationDate"] = convertToTimestamp(expiryDate);
+    // productData["expirationDate"] = $(".addEditModal").find("#datepicker").val();
     productData["meal_href"] = $(".addEditModal").find(".meal_href").val();
     productData["price"] = $(".addEditModal").find(".productPrice").val();
     productData["discount"] = $(".addEditModal").find(".productDiscount").val();

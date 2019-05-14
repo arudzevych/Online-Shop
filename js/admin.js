@@ -57,9 +57,18 @@ function displayAdminContent(content) {
             // var hostEndIndex = hostStartIndex + host.length;
             var result_ingredients_href = ingredients_href.splice(indexToInsert, 0, "/cloud-api");
 
+            //convert timestamp to date
+            var d = convertToDate(content[i].expirationDate);
+            var date = d.getDate();
+            if (date < 10) {date = "0" + date};
+            var month = d.getMonth();
+            if (month<10) {month = "0" + month};
+            var expiryDate = (date + '.' + month + '.' + d.getFullYear());
+            
+
             productManagerHtml += " <p class=\"name\">" + content[i].name + "</p>";
             productManagerHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
-            productManagerHtml += " <p class=\"expirationDate\">" + content[i].expirationDate + "</p>";
+            productManagerHtml += " <p class=\"expirationDate\">" + expiryDate + "</p>";
             productManagerHtml += " <p class=\"meal_href hide\">" + result_meal_href + "</p>";
             productManagerHtml += " <p class=\"price\">" + content[i].price + "</p>";
             productManagerHtml += " <p class=\"discount hide\">" + content[i].discount + "</p>";
@@ -81,3 +90,8 @@ function displayAdminContent(content) {
 String.prototype.splice = function(idx, rem, str) {
     return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };
+
+function convertToDate(timestamp){
+    var date = new Date(timestamp);
+    return date;
+}
