@@ -29,15 +29,18 @@ $(".products").click(function(event) {
 // add to cart:
 function AddToCart(product) {
     if (product != undefined) {
+        // product Data object
+        productData = {};
         // product
         // var prodImage = $(product).find("img")[0].outerHTML;
-        var prodName = $(product).find(".name").text();
-        var prodAmount = $(product).find(".amount").text();
-        var prodExpirationDate = $(product).find(".expirationDate").text();
-        var prodMeal_href = $(product).find(".meal_href ").text();
+        productData["prodName"] = $(product).find(".name").text();
+        productData["prodPrice"] = $(product).find(".price").text();
+        productData["prodOldPrice"] = $(product).find(".oldPrice").text();
+        productData["prodExpirationDate"] = $(product).find(".expirationDate").text();
+        productData["prodMeal_href"] = $(product).find(".meal_href ").text();
 
         // store product data to Session:
-        var productData = [prodName, prodAmount, prodExpirationDate, prodMeal_href];
+        // var productData = [prodName, prodPrice, prodExpirationDate, prodMeal_href];
         // open popup
         var cartArray = addToSession(productData);
         drawModal();
@@ -72,7 +75,7 @@ function OpenSignUp() {
 // add to session product and retriev all products from session
 function addToSession(productData) {
     // add current product to session array
-    if (productData != undefined) sessionStorage.setItem(productData[0], JSON.stringify(productData)); //cartArray.push(productData);
+    if (productData != undefined) sessionStorage.setItem(productData.prodName, JSON.stringify(productData)); //cartArray.push(productData);
 
     return sessionStorage;
 }
@@ -87,8 +90,8 @@ function toggleCart() {
         // exactly save current pruduct amount to sassionStorage:
         var itemJSON = sessionStorage.getItem(name);
         var item = JSON.parse(itemJSON);
-        item.push(amount);
-        sessionStorage.setItem(item[0], JSON.stringify(item));
+        item["clientAmount"] = amount;
+        sessionStorage.setItem(item.prodName, JSON.stringify(item));
     });
 
 
@@ -114,24 +117,31 @@ function drawModal() {
         "<button class=\"deleteCart\">очистити кошик</button>" +
         "</div>";
     cartHtml += "<div class=\"cartProducts\">";
-
+    // total price sum 
+    var totalPrice = 0;
+    var totalOldPrice = 0;
     //     cartArray.forEach(function(element, index, arr) {
     for (var i = 0; i < sessionStorage.length; i++) {
         var itemJSON = sessionStorage.getItem(sessionStorage.key(i));
 
         var item = JSON.parse(itemJSON);
-        var name = item[0];
-        var amount = item[1];
-        var expirationDate = item[2];
-        var meal_href = item[3]
-        var clientAmount = item[4];
+        var name = item.prodName;
+        var price = item.prodPrice;
+        var oldPrice = item.prodOldPrice;
+        var expirationDate = item.prodExpirationDate;
+        var meal_href = item.prodMeal_href
+        var clientAmount = item.clientAmount;
+
+        if (oldPrice == "") oldPrice = price;
+        totalOldPrice += parseFloat(oldPrice, 10);
+        totalPrice += parseFloat(price, 10);
         if (clientAmount == undefined) clientAmount = 1;
         cartHtml += "<div class=\"cartProduct\">";
         // cartHtml += "<div class=\"imgContainer\">" +
         //     image +
         //     "</div>"; //end of imgContainer
         cartHtml += "<p class=cartItemName>" + name + "</p>";
-        cartHtml += "<p>" + amount + "</p>";
+        cartHtml += "<p>" + price + "</p>";
         cartHtml += "<p>" + expirationDate + "</p>";
         cartHtml += "<button class=removeCartItemButton type=button>видалити</button>";
         cartHtml += "<br>";
@@ -141,6 +151,7 @@ function drawModal() {
     }
     cartHtml += "</div>" +
         "</div>"; //cartProducts end
+    cartHtml += "<div class=\"totalSumContainer\">вартість кошику: <div class='oldPrice'>" + totalOldPrice + " </div><b> " + totalPrice + "</b></div>";
     cartHtml += "<div class=\"checkoutContainer\">" +
         "<button class=\"checkout doubleDackerButton\">оформити замовлення</button>";
 

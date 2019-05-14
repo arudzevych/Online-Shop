@@ -118,6 +118,11 @@ button {
     margin-bottom: 20px;
 }
 
+.totalSumContainer {
+    text-align: center;
+    font-size: 3.5rem;
+}
+
 .doubleDackerButton {
     height: 9rem;
 }
@@ -429,6 +434,10 @@ button i {
         height: 2rem;
         font-size: 1.5rem;
         cursor: pointer;
+    }
+    .totalSumContainer {
+        text-align: center;
+        font-size: 1.5rem;
     }
     .doubleDackerButton {
         height: 4rem;

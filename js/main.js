@@ -55,7 +55,7 @@ function displayContent(content) {
             productHtml += " <p class=\"expirationDate\">" + content[i].expirationDate + "</p>";
             productHtml += " <p class=\"meal_href hide\">" + content[i]._links.self.href + "</p>";
             if (content[i].discount != null) {
-                var old_price = parseInt(content[i].price, 10);
+                var old_price = parseFloat(content[i].price, 10);
                 // let's calculate new price
                 var real_discount = old_price * 0.01;
                 var newPrice = old_price - old_price * real_discount;
