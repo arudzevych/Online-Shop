@@ -38,7 +38,7 @@ function EditProduct(product) {
         productData["meal_href"] = $(product).find(".meal_href").text();
         productData["price"] = $(product).find(".price").text()
         productData["discount"] = $(product).find(".discount").text()
-        productData["igredients"] = $(product).find(".ingredients").text();
+        productData["ingredients"] = $(product).find(".ingredients").text();
 
         drawAdminModal(productData);
     }
@@ -77,7 +77,7 @@ function drawAdminModal(productData) {
                 var dataArray = []
                 var ingredientsArray = [];
                 dataArray = data._embedded.ingredients;
-
+                var ingredientsEntityJSON = JSON.stringify(data._embedded.ingredients);
 
                 dataArray.forEach(function(element) {
                     ingredientsArray.push(element.name);
@@ -90,6 +90,7 @@ function drawAdminModal(productData) {
                 // }
                 ingredientsHtml = ingredientsArray.join("\n");
                 productData["ingredients"] = ingredientsArray.join("\n");
+                productData["ingredientsEntityJSON"] = ingredientsEntityJSON;
                 // let's draw modalAdminHtml
                 var managerModalHtml = drawExactlyAdminModalHtml(productData);
 
@@ -145,6 +146,7 @@ function drawExactlyAdminModalHtml(productData) {
         // ingredients
         "<span>Інгредієнти:</span>" +
         "<textarea class=\"productIngredients\" rows=\"4\">" + productData.ingredients + "</textarea>" +
+        "<textarea class=\"ingredientsEntityJSON hide\" rows=\"50\">" + productData.ingredientsEntityJSON + "</textarea>" +
 
         "</div>";
 
@@ -175,6 +177,10 @@ $(".addEditModal").click(function(event) {
 
             productData = buffObj;
             if (productData.meal_href != "undefined") {
+
+                var ingredients = JSON.parse(productData.ingredientsEntityJSON);
+
+
                 // call to PUT
                 $.ajax({
                     url: productData.meal_href,
@@ -270,7 +276,7 @@ function collectProductData() {
     productData["meal_href"] = $(".addEditModal").find(".meal_href").val();
     productData["price"] = $(".addEditModal").find(".productPrice").val();
     productData["discount"] = $(".addEditModal").find(".productDiscount").val();
-
+    productData["ingredientsEntityJSON"] = $(".addEditModal").find(".ingredientsEntityJSON").val();
     // only inicizlyze product characteristics
     var prodIngredients = [];
     var prodIngredientsString = $(".addEditModal").find(".productIngredients").val();

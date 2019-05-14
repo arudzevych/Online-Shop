@@ -40,7 +40,7 @@ function displayAdminContent(content) {
             // content[i].image+
             // "</div>";
             // productManagerHtml+=" <p class=\"code\">"+codes[i]+"</p>";
-
+            var mealJSON = JSON.stringify(content[i]);
             var name = content[i].name;
             // let's get and modify meal_href
             var meal_href = content[i]._links.self.href;
@@ -73,6 +73,7 @@ function displayAdminContent(content) {
             productManagerHtml += " <p class=\"price\">" + content[i].price + "</p>";
             productManagerHtml += " <p class=\"discount hide\">" + content[i].discount + "</p>";
             productManagerHtml += " <p class=\"ingredients hide\">" + result_ingredients_href + "</p>";
+
             productManagerHtml += " </div>";
             if ((counter % countInRow - (countInRow - 1)) == 0) { //than end of new row
                 productManagerHtml += "</div>";
