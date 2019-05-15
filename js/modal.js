@@ -135,6 +135,8 @@ function drawModal() {
         if (oldPrice == "") oldPrice = price;
         totalOldPrice += parseFloat(oldPrice, 10);
         totalPrice += parseFloat(price, 10);
+
+        if (totalPrice == totalOldPrice) totalOldPrice = ""
         if (clientAmount == undefined) clientAmount = 1;
         cartHtml += "<div class=\"cartProduct\">";
         // cartHtml += "<div class=\"imgContainer\">" +
@@ -151,6 +153,7 @@ function drawModal() {
     }
     cartHtml += "</div>" +
         "</div>"; //cartProducts end
+
     cartHtml += "<div class=\"totalSumContainer\">вартість кошику: <div class='oldPrice'>" + totalOldPrice + " </div><b> " + totalPrice + "</b></div>";
     cartHtml += "<div class=\"checkoutContainer\">" +
         "<button class=\"checkout doubleDackerButton\">оформити замовлення</button>";

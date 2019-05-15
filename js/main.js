@@ -54,11 +54,13 @@ function displayContent(content) {
             productHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
             productHtml += " <p class=\"expirationDate\">" + content[i].expirationDate + "</p>";
             productHtml += " <p class=\"meal_href hide\">" + content[i]._links.self.href + "</p>";
-            if (content[i].discount != null) {
+            if (content[i].discount != null && content[i].discount != 0) {
                 var old_price = parseFloat(content[i].price, 10);
                 // let's calculate new price
-                var real_discount = old_price * 0.01;
+                var real_discount = content[i].discount * 0.01;
                 var newPrice = old_price - old_price * real_discount;
+                // let's truncate
+                newPrice = Number((newPrice).toFixed(4)); // 6.7
                 productHtml += " <p class=\"discount \" title='знижка'>" +
 
                     "<span class=\"fa-stack fa-lg\">" +
