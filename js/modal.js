@@ -177,6 +177,9 @@ function drawModal(toggleModal) {
     cartHtml += "<div class=\"checkoutContainer\">" +
         "<button class=\"checkout doubleDackerButton\">оформити замовлення</button>";
 
+    // let's save totalPrice to sessionStorage
+    setCookie("totalPrice", totalPrice);
+
     $(".cartModal .modal-content").html(cartHtml);
     // show modal
     if (toggleModal) cartModal.classList.toggle("show-modal");
@@ -202,64 +205,120 @@ function drawModal(toggleModal) {
 }
 // In Cart:
 $(".cartModal").click(function(event) {
-    var target = event.target;
-    if ($(target).is(".deleteCart")) {
-        sessionStorage.clear();
-        var successHtml = "<div class=\"successContainer\">" +
-            "<div class=\"row2\">У кошику нічого немає:(</div>" +
-            "</div>";
-        $(this).find(".modal-content").html(successHtml)
-    } else {
-        // if c;ient want to delete current product item
-        if ($(target).is(".removeCartItemButton")) {
-            var itemToDelete = $(target).parent();
-            var nameToDelete = $(itemToDelete).find(".cartItemName").text();
-            sessionStorage.removeItem(nameToDelete);
-            $(itemToDelete).remove();
-            drawModal(false);
-        }
-        if ($(target).is(".checkout")) {
-            // close cart modal
-            cartModal.classList.toggle("show-modal");
-            // initialize checkout html that i will paste to checkoutModal
-            var checkoutHtml = "<div class=\"checkoutProducts\">";
-            // open products array in cart
-            var cartArray = addToSession();
-            // paste products from cart to checkout html
-            cartArray.forEach(function(element, index, arr) {
-                var image = element[0];
-                var name = element[1];
-                var price = element[2];
-                var code = element[3];
-                checkoutHtml += "<div class=\"checkoutProduct\">"
-                checkoutHtml += "<div class=\"imgContainer\">" +
-                    image +
-                    "</div>";
-                checkoutHtml += "<p>" + name + "</p>";
-                checkoutHtml += "<p>" + price + "</p>";
-                checkoutHtml += "<p>" + code + "</p></div>";
-            });
-            // add inputs of client's contact data to checkoutHtml
-            checkoutHtml += "</div>" + //end of "checkoutProducts div
-                "<div class=\"buyerData\">" +
-                "<span>Ваше ім'я:</span>" +
-                "<input class=\"buyerName\" type=\"text\">" +
-                "<span>Ваш е-мейл:</span>" +
-                "<input class=\"buyerEmail\" type=\"text\">" +
-                "<span>Ваш телефон:</span>" +
-                "<input class=\"buyerPhone\" type=\"text\">" +
+        var target = event.target;
+        if ($(target).is(".deleteCart")) {
+            sessionStorage.clear();
+            var successHtml = "<div class=\"successContainer\">" +
+                "<div class=\"row2\">У кошику нічого немає:(</div>" +
                 "</div>";
-            checkoutHtml += "<div class=\"chekoutButtonContainer\">" +
-                "<button class=\"checkoutButton doubleDackerButton\">підтвердити замовлення</button>" +
-                "</div>";
-            // paste checkoutHtml to checkoutModal
-            $(".checkoutModal .modal-content").html(checkoutHtml);
-            // show checkout modal
-            checkoutModal.classList.toggle("show-modal");
-        }
-    }
-})
+            $(this).find(".modal-content").html(successHtml);
+        } else {
+            // if c;ient want to delete current product item
+            if ($(target).is(".removeCartItemButton")) {
+                var itemToDelete = $(target).parent();
+                var nameToDelete = $(itemToDelete).find(".cartItemName").text();
+                sessionStorage.removeItem(nameToDelete);
+                $(itemToDelete).remove();
+                drawModal(false);
+            }
+            if ($(target).is(".checkout")) {
+                // close cart modal
+                cartModal.classList.toggle("show-modal");
+                // initialize checkout html that i will paste to checkoutModal
+                var checkoutHtml = "<div class=\"checkoutProducts\">";
+                // open products array in cart
+                for (var i = 0; i < sessionStorage.length; i++) {
+                    var itemJSON = sessionStorage.getItem(sessionStorage.key(i));
 
+                    var item = JSON.parse(itemJSON);
+                    var name = item.prodName;
+                    var price = item.prodPrice;
+                    var oldPrice = item.prodOldPrice;
+                    var expirationDate = item.prodExpirationDate;
+                    var meal_href = item.prodMeal_href
+                    var clientAmount = item.clientAmount;
+
+                    checkoutHtml += "<div class=\"checkoutProduct\">"
+                        // checkoutHtml += "<div class=\"imgContainer\">" +
+                        //     image +
+                        //     "</div>";
+                    checkoutHtml += "<p>" + name + "</p>";
+                    checkoutHtml += "<p>" + price + "</p>" +
+                        "</div>";
+                }
+                // add inputs of client's contact data to checkoutHtml
+                checkoutHtml += "</div>" + //end of "checkoutProducts div
+                    "<div class=\"buyerData\">" +
+                    "<span>Ваше ім'я:</span>" +
+                    "<input class=\"buyerName\" type=\"text\">" +
+                    "<span>Ваш е-мейл:</span>" +
+                    "<input class=\"buyerEmail\" type=\"text\">" +
+                    "<span>Ваш телефон:</span>" +
+                    "<input class=\"buyerPhone\" type=\"text\">" +
+                    "<span>Адреса доставки:</span>" +
+                    "<input class=\"destinationPoint\" type=\"text\">" +
+                    "<span>Загальна ціна: <b>" + getCookie("totalPrice") + "</b></span>" +
+                    "</div>";
+                checkoutHtml += "<div class=\"chekoutButtonContainer\">" +
+                    "<button class=\"checkoutButton doubleDackerButton\">підтвердити замовлення</button>" +
+                    "</div>";
+                // paste checkoutHtml to checkoutModal
+                $(".checkoutModal .modal-content").html(checkoutHtml);
+                // show checkout modal
+                checkoutModal.classList.toggle("show-modal");
+            }
+        }
+    })
+    // authModal if user press .sign_inButton 
+$(".checkoutModal").click(function(event) {
+    var myModal = this;
+    var target = event.target;
+    // let's collect order details 
+    var checkoutData = collectCheckoutModal();
+    // let's create order
+    if ($(target).is(".checkoutButton")) {
+        // call to POST
+        $.ajax({
+            // url: "http://" + host + "/cloud-api/registration",
+            url: "http://" + host + ":8080/cloud-api/order/create",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({
+                "name": checkoutData.name,
+                "userId": null, //getCookie("userId"),
+                "phone": checkoutData.phone,
+                "destinationPoint": checkoutData.destinationPoint,
+                "payment": getCookie("totalPrice"),
+                "idMealList": null,
+            }),
+            type: "POST",
+            crossDomain: true,
+            success: function() {
+                // close modal
+                sessionStorage.clear();
+                var successHtml = "<div class=\"successContainer\">" +
+                    "<div class=\"row2\">ми отримали Ваше замовлення :)</div>" +
+                    "</div>";
+                $(this).find(".modal-content").html(successHtml);
+                // // refresh products
+                // uploadProducts();
+            }
+        })
+    }
+});
+// collect product input data
+function collectCheckoutModal() {
+
+    // output array
+    var checkoutData = {};
+    checkoutData["name"] = $(".checkoutModal").find(".buyerName").val();
+    checkoutData["phone"] = $(".checkoutModal").find(".buyerPhone").val();
+    checkoutData["destinationPoint"] = $(".checkoutModal").find(".destinationPoint").val();
+
+    // return output productArray data
+    return checkoutData;
+}
 // Authorization madal
 function drawAuthModal() {
     var authHtml = "<div class=\"inputsData\">" +
@@ -306,6 +365,7 @@ function drawSignUpModal() {
 }
 
 closeCartButton.addEventListener("click", toggleCart);
+closeCheckoutButton.addEventListener("click", toggleCheckout);
 closeAuthButton.addEventListener("click", toggleAuth);
 closeSignUpButton.addEventListener("click", toggleSignUp);
 showCartButton.addEventListener("click", OpenCart);
