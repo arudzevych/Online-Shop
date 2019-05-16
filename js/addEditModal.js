@@ -59,10 +59,12 @@ function drawAdminModal(productData) {
 
     if (ingredients != undefined) {
 
+
         var stringIngredients = "";
         for (var i = 0; i < ingredients.length; i++) {
             if (i == 0) { stringIngredients += ingredients[i].name; } else {
                 stringIngredients += "\n" + ingredients[i].name;
+
             }
         }
 
@@ -74,6 +76,7 @@ function drawAdminModal(productData) {
         // show modal
         addEditModal.classList.toggle("show-modal");
         datePicker();
+
         // }
         // });
     } else {
@@ -87,6 +90,7 @@ function drawAdminModal(productData) {
         addEditModal.classList.toggle("show-modal");
         datePicker();
 
+
     }
 }
 
@@ -98,7 +102,9 @@ function datePicker() {
     });
 }
 
+
 function drawExactlyAdminModalHtml(productData, addNew) {
+
     // image that manager can paste to DB
     var managerModalHtml = "";
     var discount = "";
@@ -116,6 +122,7 @@ function drawExactlyAdminModalHtml(productData, addNew) {
         "<input type=\"text\" id=\"datepicker\">" +
         // '<input type="date" id="datepicker" data-date-inline-picker="true" onselect=getChosenDate min=' + dateString + '/>' +
         productData.expirationDate +
+
         "<span>ціна:</span>" +
         "<input class=\"inputData productPrice\" type=\"text\" value=\"" + productData.price + "\">" +
         "<span>знижка:</span>" +
@@ -157,6 +164,7 @@ $(".addEditModal").click(function(event) {
             alert("неправильний формат полів: " + uncorrectFields);
         } else {
 
+
             var buffObj = {}
 
             Object.keys(productData).forEach(function(item) {
@@ -178,6 +186,7 @@ $(".addEditModal").click(function(event) {
                 MeaL.price = productData["price"];
                 MeaL.discount = productData["discount"];
 
+
                 // flag defining that lod ingredients are same to new ones
                 var sameIngredients = true;
                 // new ingredients
@@ -185,6 +194,7 @@ $(".addEditModal").click(function(event) {
                 // let's foreach by old ingredients
                 MeaL.ingredients.forEach(function(oldIngredient) {
                     if (!newIngredients.includes(oldIngredient.name)) { sameIngredients = false; }
+
                 })
                 if (MeaL.ingredients.length != newIngredients.length) sameIngredients = false;
                 // if old ingredients are note same as new ingredients 
@@ -230,6 +240,7 @@ $(".addEditModal").click(function(event) {
                 })
             }
         }
+
     }
     if ($(target).is(".delete")) {
         // manager clicks eectly on save button
@@ -255,6 +266,8 @@ $(".addEditModal").click(function(event) {
 
 
 
+
+
 function convertToTimestamp(expiryDate) {
     var splitedExpiryDate = expiryDate.split(".");
     var year = splitedExpiryDate[2];
@@ -266,17 +279,21 @@ function convertToTimestamp(expiryDate) {
     return timestamp;
 };
 
+
 // collect product input data
+
 function collectProductData() {
     // output array
     var productData = {};
     productData["name"] = $(".addEditModal").find(".productName").val();
     productData["amount"] = $(".addEditModal").find(".productAmount").val();
+
     productData["expirationDate"] = $(".addEditModal").find("#datepicker").val();
 
     if (productData["expirationDate"] != "") productData["expirationDate"] = convertToTimestamp(expiryDate);
     productData["mealJSON"] = $(".addEditModal").find(".mealJSON").val();
     // let's truncate price to two symbols after dot, comma
+
     productData["price"] = $(".addEditModal").find(".productPrice").val();
     // price = Number((parseFloat(price, 10)).toFixed(2));
     // productData["price"] = price.toString(10);
@@ -299,6 +316,7 @@ $(closeaddEditButton).click(function() {
     // close modal
     addEditModal.classList.toggle("show-modal");
 })
+
 
 
 // working with ingredients update
@@ -450,3 +468,4 @@ function checkProductData(productData) {
     }
     return uncorrectFields;
 }
+

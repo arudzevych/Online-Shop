@@ -48,10 +48,21 @@ function displayAdminContent(content) {
             var expiryDate = (date + '.' + month + '.' + d.getFullYear());
 
 
+            //convert timestamp to date
+            var d = convertToDate(content[i].expirationDate);
+            var date = d.getDate();
+            if (date < 10) {date = "0" + date};
+            var month = d.getMonth();
+            if (month<10) {month = "0" + month};
+            var expiryDate = (date + '.' + month + '.' + d.getFullYear());
+            
+
             productManagerHtml += " <p class=\"name\">" + content[i].name + "</p>";
             productManagerHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
             productManagerHtml += " <p class=\"expirationDate\">" + expiryDate + "</p>";
+
             productManagerHtml += " <p class=\"mealJSON hide\">" + mealJSON + "</p>";
+
             productManagerHtml += " <p class=\"price\">" + content[i].price + "</p>";
             productManagerHtml += " <p class=\"discount hide\">" + content[i].discount + "</p>";
 
@@ -73,7 +84,9 @@ String.prototype.splice = function(idx, rem, str) {
     return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };
 
+
 function convertToDate(timestamp) {
     var date = new Date(timestamp);
     return date;
 }
+
