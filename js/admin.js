@@ -1,20 +1,16 @@
 // main variables:
-// main content array variable
 host = window.location.hostname
-    // initialize and upload content
+
+// initialize and upload content
 function uploadProducts() {
     $.ajax({
-        //   // тут замість app/selectFrom.php напиши адресу до свого серверу 
-        //   // (що буде повертати адресу картинки у форматі json)
-        // url: "http://" + host + "/cloud-api/meals",
-        url: "http://" + host + ":8080/cloud-api/meals",
+
+        // url: "http://" + host + "/cloud-api/meals/select",
+        url: "http://" + host + ":8080/cloud-api/meals/select",
 
         type: "GET",
         crossDomain: true,
-        success: function(data) {
-            var dataArray = []
-
-            dataArray = data._embedded.meals;
+        success: function(dataArray) {
 
             // let's display content
             displayAdminContent(dataArray);
@@ -42,37 +38,22 @@ function displayAdminContent(content) {
             // productManagerHtml+=" <p class=\"code\">"+codes[i]+"</p>";
             var mealJSON = JSON.stringify(content[i]);
             var name = content[i].name;
-            // let's get and modify meal_href
-            var meal_href = content[i]._links.self.href;
-
-            var mealsStartIndex = meal_href.indexOf("meals");
-            var indexToInsert = mealsStartIndex - 1;
-            // var hostEndIndex = hostStartIndex + host.length;
-            var result_meal_href = meal_href.splice(indexToInsert, 0, "/cloud-api");
-
-            //let's get and modify ingredients href:
-            var ingredients_href = content[i]._links.ingredients.href;
-            var mealsStartIndex = ingredients_href.indexOf("meals");
-            var indexToInsert = mealsStartIndex - 1;
-            // var hostEndIndex = hostStartIndex + host.length;
-            var result_ingredients_href = ingredients_href.splice(indexToInsert, 0, "/cloud-api");
 
             //convert timestamp to date
             var d = convertToDate(content[i].expirationDate);
             var date = d.getDate();
-            if (date < 10) {date = "0" + date};
+            if (date < 10) { date = "0" + date };
             var month = d.getMonth();
-            if (month<10) {month = "0" + month};
+            if (month < 10) { month = "0" + month };
             var expiryDate = (date + '.' + month + '.' + d.getFullYear());
-            
+
 
             productManagerHtml += " <p class=\"name\">" + content[i].name + "</p>";
             productManagerHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
             productManagerHtml += " <p class=\"expirationDate\">" + expiryDate + "</p>";
-            productManagerHtml += " <p class=\"meal_href hide\">" + result_meal_href + "</p>";
+            productManagerHtml += " <p class=\"mealJSON hide\">" + mealJSON + "</p>";
             productManagerHtml += " <p class=\"price\">" + content[i].price + "</p>";
             productManagerHtml += " <p class=\"discount hide\">" + content[i].discount + "</p>";
-            productManagerHtml += " <p class=\"ingredients hide\">" + result_ingredients_href + "</p>";
 
             productManagerHtml += " </div>";
             if ((counter % countInRow - (countInRow - 1)) == 0) { //than end of new row
@@ -83,7 +64,7 @@ function displayAdminContent(content) {
         if (counter % countInRow != 0 && productsCount != 0) {
             productManagerHtml += "</div>";
         }
-        // show up products characteristics
+        // draw
         $(".productManager").html(productManagerHtml);
     }
 }
@@ -92,7 +73,7 @@ String.prototype.splice = function(idx, rem, str) {
     return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };
 
-function convertToDate(timestamp){
+function convertToDate(timestamp) {
     var date = new Date(timestamp);
     return date;
 }

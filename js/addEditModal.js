@@ -32,13 +32,7 @@ function EditProduct(product) {
 
         // product
         // var prodImage = $(product).find("img")[0].outerHTML;
-        productData["name"] = $(product).find(".name").text();
-        productData["amount"] = $(product).find(".amount").text();
-        productData["expirationDate"] = $(product).find(".expirationDate").text();
-        productData["meal_href"] = $(product).find(".meal_href").text();
-        productData["price"] = $(product).find(".price").text()
-        productData["discount"] = $(product).find(".discount").text()
-        productData["ingredients"] = $(product).find(".ingredients").text();
+        productData = JSON.parse($(product).find(".mealJSON").text());
 
         drawAdminModal(productData);
     }
@@ -51,7 +45,6 @@ function AddProduct() {
     productData["name"] = "";
     productData["amount"] = "";
     productData["expirationDate"] = "";
-    productData["meal_href"] = undefined;
     productData["price"] = "";
     productData["discount"] = "";
 
@@ -62,51 +55,35 @@ function AddProduct() {
 function drawAdminModal(productData) {
 
     // html text that i paste to appropriate textarea
-    var ingredients = productData["ingredients"];
+    var ingredients = productData.ingredients;
 
     if (ingredients != undefined) {
-        // let's get ingredients:
-        $.ajax({
-            //   // тут замість app/selectFrom.php напиши адресу до свого серверу 
-            //   // (що буде повертати адресу картинки у форматі json)
-            url: ingredients,
 
-            type: "GET",
-            crossDomain: true,
-            success: function(data) {
-                var dataArray = []
-                var ingredientsArray = [];
-                dataArray = data._embedded.ingredients;
-                var ingredientsEntityJSON = JSON.stringify(data._embedded.ingredients);
-
-                dataArray.forEach(function(element) {
-                    ingredientsArray.push(element.name);
-                });
-                // // try to parse ingredients json data
-                // try {
-                //     ingredientsArray = JSON.parse(ingredients);
-                // } catch (e) {
-                //     // error occurs usually when characteristics=="";
-                // }
-                ingredientsHtml = ingredientsArray.join("\n");
-                productData["ingredients"] = ingredientsArray.join("\n");
-                productData["ingredientsEntityJSON"] = ingredientsEntityJSON;
-                // let's draw modalAdminHtml
-                var managerModalHtml = drawExactlyAdminModalHtml(productData);
-
-                $(".addEditModal .modal-content").html(managerModalHtml);
-                // show modal
-                addEditModal.classList.toggle("show-modal");
-                datePicker();
+        var stringIngredients = "";
+        for (var i = 0; i < ingredients.length; i++) {
+            if (i == 0) { stringIngredients += ingredients[i].name; } else {
+                stringIngredients += "\n" + ingredients[i].name;
             }
-        });
-    } else {
-        productData["ingredients"] = "";
+        }
+
+        productData["stringIngredients"] = stringIngredients;
         // let's draw modalAdminHtml
-        var managerModalHtml = drawExactlyAdminModalHtml(productData);
+        var managerModalHtml = drawExactlyAdminModalHtml(productData, false);
 
         $(".addEditModal .modal-content").html(managerModalHtml);
         // show modal
+        addEditModal.classList.toggle("show-modal");
+        datePicker();
+        // }
+        // });
+    } else {
+        productData["ingredients"] = "";
+        productData["stringIngredients"] = "";
+        //     // let's draw modalAdminHtml
+        var managerModalHtml = drawExactlyAdminModalHtml(productData, true);
+
+        $(".addEditModal .modal-content").html(managerModalHtml);
+        //     // show modal
         addEditModal.classList.toggle("show-modal");
         datePicker();
 
@@ -121,9 +98,11 @@ function datePicker() {
     });
 }
 
-function drawExactlyAdminModalHtml(productData) {
+function drawExactlyAdminModalHtml(productData, addNew) {
     // image that manager can paste to DB
     var managerModalHtml = "";
+    var discount = "";
+    if (productData.discount != null) discount = productData.discount;
     //  managerModalHtml+= "<span>зображення товару:</span>";
     // managerModalHtml += "<div class=\"imgContainer\" contentEditable=\"true\">" +
     //     image +
@@ -137,18 +116,23 @@ function drawExactlyAdminModalHtml(productData) {
         "<input type=\"text\" id=\"datepicker\">" +
         // '<input type="date" id="datepicker" data-date-inline-picker="true" onselect=getChosenDate min=' + dateString + '/>' +
         productData.expirationDate +
-        "<input class=\"inputData meal_href hide\" type=\"text\" value=\"" + productData.meal_href + "\">" +
         "<span>ціна:</span>" +
         "<input class=\"inputData productPrice\" type=\"text\" value=\"" + productData.price + "\">" +
         "<span>знижка:</span>" +
-        "<input class=\"inputData productDiscount\" type=\"text\" value=\"" + productData.discount + "\">" +
+        "<input class=\"inputData productDiscount\" type=\"text\" value=\"" + discount + "\">" +
 
         // ingredients
         "<span>Інгредієнти:</span>" +
-        "<textarea class=\"productIngredients\" rows=\"4\">" + productData.ingredients + "</textarea>" +
-        "<textarea class=\"ingredientsEntityJSON hide\" rows=\"50\">" + productData.ingredientsEntityJSON + "</textarea>" +
+        "<textarea class=\"productIngredients\" rows=\"4\">" + productData.stringIngredients + "</textarea>";
+    // "<textarea class=\"ingredientsEntityJSON hide\" rows=\"50\">" + productData.ingredients + "</textarea>" +
+    // full meal
+    if (addNew) {
+        managerModalHtml += "<textarea class=\"mealJSON hide\" rows=\"50\"></textarea>";
+    } else {
+        managerModalHtml += "<textarea class=\"mealJSON hide\" rows=\"50\">" + JSON.stringify(productData) + "</textarea>";
 
-        "</div>";
+    }
+    managerModalHtml += "</div>";
 
     managerModalHtml += "<div class=\"saveContainer\">" +
         "<button class=\"save\">зберегти</button>" +
@@ -166,11 +150,13 @@ $(".addEditModal").click(function(event) {
 
         // manager clicks exectly on save button
         var productData = collectProductData();
+
         // let's check productData format:
         var uncorrectFields = checkProductData(productData);
         if (uncorrectFields != "") {
             alert("неправильний формат полів: " + uncorrectFields);
         } else {
+
             var buffObj = {}
 
             Object.keys(productData).forEach(function(item) {
@@ -180,16 +166,43 @@ $(".addEditModal").click(function(event) {
             });
 
             productData = buffObj;
-            if (productData.meal_href != "undefined") {
 
-                var ingredients = JSON.parse(productData.ingredients);
-                // if (ingredients[0] != "") {
-                ////let's update ingredients 
-                // } else {
-                // we won't update ingredients
-                // call to PUT meal
-                putMeal(productData, null);
-                // }
+            // if it is UPDATE
+            if (productData.mealJSON != null) {
+                // fetch old source meal
+                var MeaL = JSON.parse(productData.mealJSON);
+                // edite this source meal with new customization
+                MeaL.name = productData["name"];
+                MeaL.amount = productData["amount"];
+                MeaL.expirationDate = productData["expirationDate"];
+                MeaL.price = productData["price"];
+                MeaL.discount = productData["discount"];
+
+                // flag defining that lod ingredients are same to new ones
+                var sameIngredients = true;
+                // new ingredients
+                var newIngredients = JSON.parse(productData.ingredients);
+                // let's foreach by old ingredients
+                MeaL.ingredients.forEach(function(oldIngredient) {
+                    if (!newIngredients.includes(oldIngredient.name)) { sameIngredients = false; }
+                })
+                if (MeaL.ingredients.length != newIngredients.length) sameIngredients = false;
+                // if old ingredients are note same as new ingredients 
+                if (!sameIngredients) {
+                    //let's update ingredients 
+                    getIngredientsToUpdate(MeaL, newIngredients, insertIngredientsToUpdate);
+
+
+                } else {
+                    // we won't update ingredients
+
+                    // let's delete helper stringIngredients
+                    delete MeaL.stringIngredients;
+                    // call to PUT meal
+                    putMeal(MeaL);
+                }
+
+                // if it is CREATE
             } else {
                 // call to POST
                 $.ajax({
@@ -221,9 +234,11 @@ $(".addEditModal").click(function(event) {
     if ($(target).is(".delete")) {
         // manager clicks eectly on save button
         var productData = collectProductData();
-        // call to addEditProduct.php
+        var MeaL = JSON.parse(productData.mealJSON);
+        // delete request
         $.ajax({
-            url: productData.meal_href,
+            // url: "http://" + host + "/cloud-api/meals/"+productData.id,
+            url: "http://" + host + ":8080/cloud-api/meals/" + MeaL.id,
             data: {
                 "name": productData.name,
             },
@@ -257,9 +272,10 @@ function collectProductData() {
     var productData = {};
     productData["name"] = $(".addEditModal").find(".productName").val();
     productData["amount"] = $(".addEditModal").find(".productAmount").val();
-    var expiryDate = $(".addEditModal").find("#datepicker").val();
-    productData["expirationDate"] = convertToTimestamp(expiryDate);
-    productData["meal_href"] = $(".addEditModal").find(".meal_href").val();
+    productData["expirationDate"] = $(".addEditModal").find("#datepicker").val();
+
+    if (productData["expirationDate"] != "") productData["expirationDate"] = convertToTimestamp(expiryDate);
+    productData["mealJSON"] = $(".addEditModal").find(".mealJSON").val();
     // let's truncate price to two symbols after dot, comma
     productData["price"] = $(".addEditModal").find(".productPrice").val();
     // price = Number((parseFloat(price, 10)).toFixed(2));
@@ -286,23 +302,22 @@ $(closeaddEditButton).click(function() {
 
 
 // working with ingredients update
-function getIngredientsToUpdate(updateIngredients, callback) {
+function getIngredientsToUpdate(MeaL, updateIngredients, callback) {
     // updateIngredients // ingredients that admin just type
     $.ajax({
-        //   // тут замість app/selectFrom.php напиши адресу до свого серверу 
-        //   // (що буде повертати адресу картинки у форматі json)
-        // url: "http://" + host + "/cloud-api/ingredients",
-        url: "http://" + host + ":8080/cloud-api/ingredients",
+
+        // url: "http://" + host + "/cloud-api/ingredients/select",
+        url: "http://" + host + ":8080/cloud-api/ingredients/select",
 
         type: "GET",
         crossDomain: true,
-        success: function(data) {
-            var dataArray = []
-                // full ingredients
+        success: function(dataArray) {
+
+            // full ingredients
             var fullIngredients = [];
             // new ingredients
             var newIngredients = [];
-            dataArray = data._embedded.ingredients;
+            // dataArray = data._embedded.ingredients;
 
             updateIngredients.forEach(function(ingredient) {
                 // let's determine if Javascript array contains an object with an 
@@ -322,54 +337,89 @@ function getIngredientsToUpdate(updateIngredients, callback) {
                     newIngredients.push(ingredient);
                 }
             })
-
-            callback(fullIngredients, newIngredients);
+            if (newIngredients.length == 0) {
+                delete MeaL.stringIngredients
+                MeaL["ingredients"] = fullIngredients;
+                putMeal(MeaL);
+            } else {
+                callback(MeaL, fullIngredients, newIngredients, putMeal);
+            }
         }
     });
 }
 
 function NamefieldIncludesInObjectsArray(ObjArray, field) {
+    var finded = false;
     ObjArray.filter(function(e) {
-        if (e.name === ingredient) return e
+        if (e.name == field) {
+            finded = e;
+        }
     });
+    return finded;
 }
 
-function insertIngredientsToUpdate(fullIngredients, newIngredients, callback) {
+function insertIngredientsToUpdate(MeaL, fullIngredients, newIngredients, callback) {
+    var ingredientName = newIngredients[0];
+    // 
+    // if (ingredientName != null) {
     // call to POST
     $.ajax({
-        // url: "http://" + host + "/cloud-api/ingredients/add",
-        url: "http://" + host + ":8080/cloud-api/ingredients/add",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        data: JSON.stringify({
-            "ingredients": newIngredients,
-        }),
-        type: "POST",
-        crossDomain: true,
-        success: function(newFullIngredients) {
-            fullIngredients.concat(newFullIngredients);
-            callback(fullIngredients);
-        }
-    })
+            // url: "http://" + host + "/cloud-api/ingredients/add",
+            url: "http://" + host + ":8080/cloud-api/ingredients/add",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({
+                "name": ingredientName,
+                "amount": null,
+                "measure": null,
+            }),
+            type: "POST",
+            crossDomain: true,
+            success: function(newFullIngredient) {
+                // add newFullIngredient to fullIngredients
+                fullIngredients.push(newFullIngredient);
+
+                // remove newFullIngredient.name from newIngredients
+                // ========
+                var index = newIngredients.indexOf(newFullIngredient.name);
+
+                if (index > -1) {
+                    newIngredients.splice(index, 1);
+                }
+                // ========
+
+                if (newIngredients.length > 0) {
+                    insertIngredientsToUpdate(MeaL, fullIngredients, newIngredients, putMeal)
+
+                } else {
+                    delete MeaL.stringIngredients
+                    MeaL["ingredients"] = fullIngredients;
+                    callback(MeaL);
+                }
+            }
+        })
+        // }
 }
 
-function putMeal(productData, fullIngredients) {
+function putMeal(MeaL) {
     // var ingredients = JSON.parse(productData.ingredientsEntityJSON);
     // call to PUT
     $.ajax({
-        url: productData.meal_href,
+        // url: "http://" + host + "/cloud-api/meals/update",
+        url: "http://" + host + ":8080/cloud-api/meals/update",
         headers: {
             'Content-Type': 'application/json'
         },
-        data: JSON.stringify({
-            "name": productData.name,
-            "amount": productData.amount,
-            "discount": productData.discount,
-            "price": productData.price,
-            "expirationDate": productData.expirationDate,
-            "ingredients": fullIngredients,
-        }),
+        data: JSON.stringify(
+            MeaL,
+            // "name": productData.name,
+            // "amount": productData.amount,
+            // "discount": productData.discount,
+            // "price": productData.price,
+            // "expirationDate": productData.expirationDate,
+            // "ingredients": fullIngredients,
+        ),
         type: "PUT",
         crossDomain: true,
         success: function() {
@@ -386,13 +436,13 @@ function checkProductData(productData) {
     var price = productData.price;
     var discount = productData.discount;
     // validation for price
-    var floatNumberCheck = new RegExp("^[0-9]{0,4}[.]?[0-9]{0,2}$");
+    var floatNumberCheck = new RegExp("^[0-9]{0,3}[.]?[0-9]{0,2}$");
     var matchStatePrice = floatNumberCheck.test(price);
     // validation for discount
     var discountNumberCheck = new RegExp("^[0-9]{0,2}$");
     var matchStateDiscount = discountNumberCheck.test(discount);
 
-    if (!matchStatePrice || price == "0") {
+    if (!matchStatePrice || price == "0" || price == "") {
         uncorrectFields += "\n - ціна";
     }
     if (!matchStateDiscount) {

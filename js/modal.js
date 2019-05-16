@@ -216,6 +216,7 @@ $(".cartModal").click(function(event) {
             var nameToDelete = $(itemToDelete).find(".cartItemName").text();
             sessionStorage.removeItem(nameToDelete);
             $(itemToDelete).remove();
+            drawModal(false);
         }
         if ($(target).is(".checkout")) {
             // close cart modal
