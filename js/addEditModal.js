@@ -38,7 +38,7 @@ function EditProduct(product) {
         productData["meal_href"] = $(product).find(".meal_href").text();
         productData["price"] = $(product).find(".price").text()
         productData["discount"] = $(product).find(".discount").text()
-        productData["igredients"] = $(product).find(".ingredients").text();
+        productData["ingredients"] = $(product).find(".ingredients").text();
 
         drawAdminModal(productData);
     }
@@ -77,7 +77,7 @@ function drawAdminModal(productData) {
                 var dataArray = []
                 var ingredientsArray = [];
                 dataArray = data._embedded.ingredients;
-
+                var ingredientsEntityJSON = JSON.stringify(data._embedded.ingredients);
 
                 dataArray.forEach(function(element) {
                     ingredientsArray.push(element.name);
@@ -90,6 +90,7 @@ function drawAdminModal(productData) {
                 // }
                 ingredientsHtml = ingredientsArray.join("\n");
                 productData["ingredients"] = ingredientsArray.join("\n");
+                productData["ingredientsEntityJSON"] = ingredientsEntityJSON;
                 // let's draw modalAdminHtml
                 var managerModalHtml = drawExactlyAdminModalHtml(productData);
 
@@ -145,6 +146,7 @@ function drawExactlyAdminModalHtml(productData) {
         // ingredients
         "<span>Інгредієнти:</span>" +
         "<textarea class=\"productIngredients\" rows=\"4\">" + productData.ingredients + "</textarea>" +
+        "<textarea class=\"ingredientsEntityJSON hide\" rows=\"50\">" + productData.ingredientsEntityJSON + "</textarea>" +
 
         "</div>";
 
@@ -158,13 +160,17 @@ function drawExactlyAdminModalHtml(productData) {
 
 // when manager click on save button
 $(".addEditModal").click(function(event) {
-        // var myModal=this;
-        var target = event.target;
-        if ($(target).is(".save")) {
+    // var myModal=this;
+    var target = event.target;
+    if ($(target).is(".save")) {
 
-            // manager clicks exectly on save button
-            var productData = collectProductData();
-
+        // manager clicks exectly on save button
+        var productData = collectProductData();
+        // let's check productData format:
+        var uncorrectFields = checkProductData(productData);
+        if (uncorrectFields != "") {
+            alert("неправильний формат полів: " + uncorrectFields);
+        } else {
             var buffObj = {}
 
             Object.keys(productData).forEach(function(item) {
@@ -175,29 +181,15 @@ $(".addEditModal").click(function(event) {
 
             productData = buffObj;
             if (productData.meal_href != "undefined") {
-                // call to PUT
-                $.ajax({
-                    url: productData.meal_href,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    data: JSON.stringify({
-                        "name": productData.name,
-                        "amount": productData.amount,
-                        "discount": productData.discount,
-                        "price": productData.price,
-                        "expirationDate": productData.expirationDate,
-                        "ingredients": null,
-                    }),
-                    type: "PUT",
-                    crossDomain: true,
-                    success: function() {
-                        // close modal
-                        addEditModal.classList.toggle("show-modal");
-                        // refresh products
-                        uploadProducts();
-                    }
-                })
+
+                var ingredients = JSON.parse(productData.ingredients);
+                // if (ingredients[0] != "") {
+                ////let's update ingredients 
+                // } else {
+                // we won't update ingredients
+                // call to PUT meal
+                putMeal(productData, null);
+                // }
             } else {
                 // call to POST
                 $.ajax({
@@ -225,27 +217,28 @@ $(".addEditModal").click(function(event) {
                 })
             }
         }
-        if ($(target).is(".delete")) {
-            // manager clicks eectly on save button
-            var productData = collectProductData();
-            // call to addEditProduct.php
-            $.ajax({
-                url: productData.meal_href,
-                data: {
-                    "name": productData.name,
-                },
-                type: "DELETE",
-                success: function() {
-                    // close modal
-                    addEditModal.classList.toggle("show-modal");
-                    // refresh products
-                    uploadProducts();
-                }
-            })
-        }
-    })
+    }
+    if ($(target).is(".delete")) {
+        // manager clicks eectly on save button
+        var productData = collectProductData();
+        // call to addEditProduct.php
+        $.ajax({
+            url: productData.meal_href,
+            data: {
+                "name": productData.name,
+            },
+            type: "DELETE",
+            success: function() {
+                // close modal
+                addEditModal.classList.toggle("show-modal");
+                // refresh products
+                uploadProducts();
+            }
+        })
+    }
+})
 
-    
+
 
 function convertToTimestamp(expiryDate) {
     var splitedExpiryDate = expiryDate.split(".");
@@ -258,7 +251,7 @@ function convertToTimestamp(expiryDate) {
     return timestamp;
 };
 
-    // collect product input data
+// collect product input data
 function collectProductData() {
     // output array
     var productData = {};
@@ -266,11 +259,13 @@ function collectProductData() {
     productData["amount"] = $(".addEditModal").find(".productAmount").val();
     var expiryDate = $(".addEditModal").find("#datepicker").val();
     productData["expirationDate"] = convertToTimestamp(expiryDate);
-    // productData["expirationDate"] = $(".addEditModal").find("#datepicker").val();
     productData["meal_href"] = $(".addEditModal").find(".meal_href").val();
+    // let's truncate price to two symbols after dot, comma
     productData["price"] = $(".addEditModal").find(".productPrice").val();
+    // price = Number((parseFloat(price, 10)).toFixed(2));
+    // productData["price"] = price.toString(10);
     productData["discount"] = $(".addEditModal").find(".productDiscount").val();
-
+    productData["ingredientsEntityJSON"] = $(".addEditModal").find(".ingredientsEntityJSON").val();
     // only inicizlyze product characteristics
     var prodIngredients = [];
     var prodIngredientsString = $(".addEditModal").find(".productIngredients").val();
@@ -288,3 +283,120 @@ $(closeaddEditButton).click(function() {
     // close modal
     addEditModal.classList.toggle("show-modal");
 })
+
+
+// working with ingredients update
+function getIngredientsToUpdate(updateIngredients, callback) {
+    // updateIngredients // ingredients that admin just type
+    $.ajax({
+        //   // тут замість app/selectFrom.php напиши адресу до свого серверу 
+        //   // (що буде повертати адресу картинки у форматі json)
+        // url: "http://" + host + "/cloud-api/ingredients",
+        url: "http://" + host + ":8080/cloud-api/ingredients",
+
+        type: "GET",
+        crossDomain: true,
+        success: function(data) {
+            var dataArray = []
+                // full ingredients
+            var fullIngredients = [];
+            // new ingredients
+            var newIngredients = [];
+            dataArray = data._embedded.ingredients;
+
+            updateIngredients.forEach(function(ingredient) {
+                // let's determine if Javascript array contains an object with an 
+                // attribute that equals a given value?
+                var fullIngredient = NamefieldIncludesInObjectsArray(dataArray, ingredient);
+                if (fullIngredient) {
+                    // this ingredient exists
+
+                    // push full ingredient to fullIngredients
+                    fullIngredients.push(fullIngredient);
+
+                } else {
+                    // ingredient is new
+
+                    // push full ingredient to newIngredients
+                    // this new ingredients must be created
+                    newIngredients.push(ingredient);
+                }
+            })
+
+            callback(fullIngredients, newIngredients);
+        }
+    });
+}
+
+function NamefieldIncludesInObjectsArray(ObjArray, field) {
+    ObjArray.filter(function(e) {
+        if (e.name === ingredient) return e
+    });
+}
+
+function insertIngredientsToUpdate(fullIngredients, newIngredients, callback) {
+    // call to POST
+    $.ajax({
+        // url: "http://" + host + "/cloud-api/ingredients/add",
+        url: "http://" + host + ":8080/cloud-api/ingredients/add",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({
+            "ingredients": newIngredients,
+        }),
+        type: "POST",
+        crossDomain: true,
+        success: function(newFullIngredients) {
+            fullIngredients.concat(newFullIngredients);
+            callback(fullIngredients);
+        }
+    })
+}
+
+function putMeal(productData, fullIngredients) {
+    // var ingredients = JSON.parse(productData.ingredientsEntityJSON);
+    // call to PUT
+    $.ajax({
+        url: productData.meal_href,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({
+            "name": productData.name,
+            "amount": productData.amount,
+            "discount": productData.discount,
+            "price": productData.price,
+            "expirationDate": productData.expirationDate,
+            "ingredients": fullIngredients,
+        }),
+        type: "PUT",
+        crossDomain: true,
+        success: function() {
+            // close modal
+            addEditModal.classList.toggle("show-modal");
+            // refresh products
+            uploadProducts();
+        }
+    })
+}
+
+function checkProductData(productData) {
+    var uncorrectFields = "";
+    var price = productData.price;
+    var discount = productData.discount;
+    // validation for price
+    var floatNumberCheck = new RegExp("^[0-9]{0,4}[.]?[0-9]{0,2}$");
+    var matchStatePrice = floatNumberCheck.test(price);
+    // validation for discount
+    var discountNumberCheck = new RegExp("^[0-9]{0,2}$");
+    var matchStateDiscount = discountNumberCheck.test(discount);
+
+    if (!matchStatePrice || price == "0") {
+        uncorrectFields += "\n - ціна";
+    }
+    if (!matchStateDiscount) {
+        uncorrectFields += "\n - знижка";
+    }
+    return uncorrectFields;
+}

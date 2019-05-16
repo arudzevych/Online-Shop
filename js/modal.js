@@ -18,6 +18,9 @@ var closeCheckoutButton = document.querySelector(".checkoutModal .close-button")
 // comment modal
 var commentModal = document.querySelector(".commentModal");
 var closeCommentButton = document.querySelector(".commentModal .close-button");
+var profileModal = document.querySelector(".userProfileModal")
+var profileButton = document.querySelector(".showUserProfileButton")
+var closeProfileButton = document.querySelector(".userProfileModal .close-button")
 // cart modal>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // add product from main page
 $(".products").click(function(event) {
@@ -29,15 +32,18 @@ $(".products").click(function(event) {
 // add to cart:
 function AddToCart(product) {
     if (product != undefined) {
+        // product Data object
+        productData = {};
         // product
         // var prodImage = $(product).find("img")[0].outerHTML;
-        var prodName = $(product).find(".name").text();
-        var prodAmount = $(product).find(".amount").text();
-        var prodExpirationDate = $(product).find(".expirationDate").text();
-        var prodMeal_href = $(product).find(".meal_href ").text();
+        productData["prodName"] = $(product).find(".name").text();
+        productData["prodPrice"] = $(product).find(".price").text();
+        productData["prodOldPrice"] = $(product).find(".oldPrice").text();
+        productData["prodExpirationDate"] = $(product).find(".expirationDate").text();
+        productData["prodMeal_href"] = $(product).find(".meal_href ").text();
 
         // store product data to Session:
-        var productData = [prodName, prodAmount, prodExpirationDate, prodMeal_href];
+        // var productData = [prodName, prodPrice, prodExpirationDate, prodMeal_href];
         // open popup
         var cartArray = addToSession(productData);
         drawModal();
@@ -69,10 +75,18 @@ function OpenSignUp() {
     $(".mainPageButtonContainer").addClass("hide");
 }
 
+// open/close userProfile modal:
+function OpenUserProfile() {
+    // // open popup
+    drawProfileModal();
+    // hide .mainPageButtonContainer
+    $(".mainPageButtonContainer").addClass("hide");
+}
+
 // add to session product and retriev all products from session
 function addToSession(productData) {
     // add current product to session array
-    if (productData != undefined) sessionStorage.setItem(productData[0], JSON.stringify(productData)); //cartArray.push(productData);
+    if (productData != undefined) sessionStorage.setItem(productData.prodName, JSON.stringify(productData)); //cartArray.push(productData);
 
     return sessionStorage;
 }
@@ -87,8 +101,8 @@ function toggleCart() {
         // exactly save current pruduct amount to sassionStorage:
         var itemJSON = sessionStorage.getItem(name);
         var item = JSON.parse(itemJSON);
-        item.push(amount);
-        sessionStorage.setItem(item[0], JSON.stringify(item));
+        item["clientAmount"] = amount;
+        sessionStorage.setItem(item.prodName, JSON.stringify(item));
     });
 
 
@@ -109,29 +123,44 @@ function toggleSignUp() {
     $(".mainPageButtonContainer").removeClass("hide");
 }
 
+function toggleProfile() {
+    profileModal.classList.toggle("show-modal");
+    // show .mainPageButtonContainer and div
+    $(".mainPageButtonContainer").removeClass("hide");
+}
+
 function drawModal() {
     var cartHtml = "<div class=\"deleteCartContainer\">" +
         "<button class=\"deleteCart\">очистити кошик</button>" +
         "</div>";
     cartHtml += "<div class=\"cartProducts\">";
-
+    // total price sum 
+    var totalPrice = 0;
+    var totalOldPrice = 0;
     //     cartArray.forEach(function(element, index, arr) {
     for (var i = 0; i < sessionStorage.length; i++) {
         var itemJSON = sessionStorage.getItem(sessionStorage.key(i));
 
         var item = JSON.parse(itemJSON);
-        var name = item[0];
-        var amount = item[1];
-        var expirationDate = item[2];
-        var meal_href = item[3]
-        var clientAmount = item[4];
+        var name = item.prodName;
+        var price = item.prodPrice;
+        var oldPrice = item.prodOldPrice;
+        var expirationDate = item.prodExpirationDate;
+        var meal_href = item.prodMeal_href
+        var clientAmount = item.clientAmount;
+
+        if (oldPrice == "") oldPrice = price;
+        totalOldPrice += parseFloat(oldPrice, 10);
+        totalPrice += parseFloat(price, 10);
+
+        if (totalPrice == totalOldPrice) totalOldPrice = ""
         if (clientAmount == undefined) clientAmount = 1;
         cartHtml += "<div class=\"cartProduct\">";
         // cartHtml += "<div class=\"imgContainer\">" +
         //     image +
         //     "</div>"; //end of imgContainer
         cartHtml += "<p class=cartItemName>" + name + "</p>";
-        cartHtml += "<p>" + amount + "</p>";
+        cartHtml += "<p>" + price + "</p>";
         cartHtml += "<p>" + expirationDate + "</p>";
         cartHtml += "<button class=removeCartItemButton type=button>видалити</button>";
         cartHtml += "<br>";
@@ -141,6 +170,8 @@ function drawModal() {
     }
     cartHtml += "</div>" +
         "</div>"; //cartProducts end
+
+    cartHtml += "<div class=\"totalSumContainer\">вартість кошику: <div class='oldPrice'>" + totalOldPrice + " </div><b> " + totalPrice + "</b></div>";
     cartHtml += "<div class=\"checkoutContainer\">" +
         "<button class=\"checkout doubleDackerButton\">оформити замовлення</button>";
 
@@ -259,6 +290,7 @@ closeSignUpButton.addEventListener("click", toggleSignUp);
 showCartButton.addEventListener("click", OpenCart);
 showSignUpButton.addEventListener("click", OpenSignUp);
 
+
 $(showAuthButton).click(function(event) {
     var loginState = checkLoginStateCookie();
     if (!loginState) {
@@ -307,6 +339,7 @@ $(".authModal").click(function(event) {
             type: 'GET',
             success: function(data) {
                 performLoginState();
+                setCookie("username", userName)
                 // close modal
                 toggleAuth();
                 if (userName == "admin") { window.open('admin.html'); }
@@ -324,11 +357,12 @@ function performLoginState() {
         deleteCookie("loginState");
         var showAuthButton = 'вхід<i class="fas fa-sign-in-alt"></i>';
         $(".showAuthButton").html(showAuthButton);
+        $(profileButton).hide();
 
         // if user perform login
     } else {
-
         setCookie("loginState", "true");
+        $(profileButton).show();
         var showAuthButton = '<i class="fas fa-sign-out-alt"></i>вихід';
         $(".showAuthButton").html(showAuthButton);
     }
@@ -378,6 +412,7 @@ function checkLoginStateCookie() {
 //     })
 
 // }
+
 // set cookie
 function setCookie(name, value, options) {
     options = options || {};
@@ -437,8 +472,8 @@ $(".signUpModal").click(function(event) {
 
         // call to POST
         $.ajax({
-            url: "http://" + host + "/cloud-api/registration",
-            // url: "http://" + host + ":8080/cloud-api/registration",
+            // url: "http://" + host + "/cloud-api/registration",
+            url: "http://" + host + ":8080/cloud-api/registration",
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -458,3 +493,81 @@ $(".signUpModal").click(function(event) {
         })
     }
 });
+
+// =========================================================================
+// user profile modal
+
+// don't show user profile button if user is not logged in
+var checkloginState = checkLoginStateCookie();
+if (!checkloginState) {
+    $(profileButton).hide();
+} else {
+    $(profileButton).show();
+}
+
+profileButton.addEventListener("click", OpenUserProfile)
+closeProfileButton.addEventListener("click", toggleProfile);
+
+// draw Profile modal
+function drawProfileModal() {
+
+    var profileHtml = "<div class=profile-data" +
+        "<div id=modal-title>Особисті дані</div>" + 
+        // "<div class=name-container" +
+        "<div id=name>Ім'я</div>" + 
+        // "</div>" +
+        // "<div class=email-container" +
+        "<div id=email>Електронна пошта</div>" + 
+        // "</div>" +
+        // "<div class=delivery-address-container" +
+        "<div class=user-delivery-address>Адреси доставки</div>" +
+        "<select id=user-delivery-address>" +
+            "<option>Адреса 1</option>" +
+            "<option>Адреса 2</option>" +
+        "</select>" + "</div>" 
+        // + "</div>"
+
+    $(".userProfileModal .modal-content").html(profileHtml);
+    // show modal
+    profileModal.classList.toggle("show-modal");
+    // hide .mainPageButtonContainer and filters divs
+    $(".mainPageButtonContainer").addClass("hide");
+
+
+    //send ajax request to get user information
+    $(function() {
+        var $profileHtml = $(".userProfileModal .modal-content");
+        // var name = $(".name-container")
+        // var email = $(".email-container")
+
+        $.ajax({
+            type: 'GET',
+            crossDomain: true,
+            url: "http://" + host + ":8080/cloud-api/users",
+            // url: "http://" + host + "/cloud-api/users",
+            success: function(data) {
+                console.log(data);
+
+                var dataArray = [];
+                dataArray = data._embedded.users;
+                console.log(dataArray);
+
+                var userName = getCookie("username");
+                console.log(userName);
+
+                dataArray.forEach(function(item) {
+                    if (item.username === userName) {
+                        var userHtml = "<div class=username>" + item.username + "</div>" +
+                        "<div class=user-email>" + item.email + "</div>"
+                        $profileHtml.append(userHtml)
+
+                        // $(name).append("<div class=username>" + item.username + "</div>")
+                        // $(email).append("<div class=user-email>" + item.email + "</div>")
+                    }
+                })
+            }
+        })
+    })
+
+
+}
