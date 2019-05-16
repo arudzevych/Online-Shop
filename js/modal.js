@@ -43,7 +43,7 @@ function AddToCart(product) {
         // var productData = [prodName, prodPrice, prodExpirationDate, prodMeal_href];
         // open popup
         var cartArray = addToSession(productData);
-        drawModal(true);
+        drawModal();
     }
 }
 // open/close cart:
@@ -51,7 +51,7 @@ function OpenCart() {
     // sessionStorage = ""
     // open popup
     // var cartArray = addToSession();
-    drawModal(true);
+    drawModal();
     // hide .mainPageButtonContainer and .filters
     $(".mainPageButtonContainer").addClass("hide");
 }
@@ -75,23 +75,8 @@ function OpenSignUp() {
 // add to session product and retriev all products from session
 function addToSession(productData) {
     // add current product to session array
-    if (productData != undefined) {
-        // foreach every pruduct object in sessionStorage
-        Object.keys(sessionStorage).forEach(function(name) {
+    if (productData != undefined) sessionStorage.setItem(productData.prodName, JSON.stringify(productData)); //cartArray.push(productData);
 
-            if (name == productData.prodName) {
-
-                var productJSON = sessionStorage.getItem(name);
-                product = JSON.parse(productJSON);
-                if (product.clientAmount != undefined) {
-
-                    var clientAmount = parseInt(product.clientAmount, 10) + 1;
-                    productData["clientAmount"] = clientAmount.toString(10);
-                }
-            }
-        })
-        sessionStorage.setItem(productData.prodName, JSON.stringify(productData)); //cartArray.push(productData);
-    }
     return sessionStorage;
 }
 
@@ -127,7 +112,7 @@ function toggleSignUp() {
     $(".mainPageButtonContainer").removeClass("hide");
 }
 
-function drawModal(toggleModal) {
+function drawModal() {
     var cartHtml = "<div class=\"deleteCartContainer\">" +
         "<button class=\"deleteCart\">очистити кошик</button>" +
         "</div>";
@@ -147,15 +132,10 @@ function drawModal(toggleModal) {
         var meal_href = item.prodMeal_href
         var clientAmount = item.clientAmount;
 
-        // clientAmount increment
-        if (clientAmount == undefined) clientAmount = 1;
-
-        // totalPrice increment
         if (oldPrice == "") oldPrice = price;
-        totalOldPrice += parseFloat(oldPrice * parseInt(clientAmount, 10), 10);
-        totalPrice += parseFloat(price * parseInt(clientAmount, 10), 10);
-
-
+        totalOldPrice += parseFloat(oldPrice, 10);
+        totalPrice += parseFloat(price, 10);
+        if (clientAmount == undefined) clientAmount = 1;
         cartHtml += "<div class=\"cartProduct\">";
         // cartHtml += "<div class=\"imgContainer\">" +
         //     image +
@@ -168,40 +148,18 @@ function drawModal(toggleModal) {
         cartHtml += "<input class=\"cartItemQuantity\" type=\"number\" value=\"" + clientAmount + "\" min=\"1\" max=\"1000\"></input>";
         cartHtml += "</div>";
         //     });
-    };
-    if (totalPrice == totalOldPrice) totalOldPrice = ""
+    }
     cartHtml += "</div>" +
         "</div>"; //cartProducts end
-
     cartHtml += "<div class=\"totalSumContainer\">вартість кошику: <div class='oldPrice'>" + totalOldPrice + " </div><b> " + totalPrice + "</b></div>";
     cartHtml += "<div class=\"checkoutContainer\">" +
         "<button class=\"checkout doubleDackerButton\">оформити замовлення</button>";
 
-    // let's save totalPrice to sessionStorage
-    setCookie("totalPrice", totalPrice);
-
     $(".cartModal .modal-content").html(cartHtml);
     // show modal
-    if (toggleModal) cartModal.classList.toggle("show-modal");
+    cartModal.classList.toggle("show-modal");
     // hide .mainPageButtonContainer and filters divs
     $(".mainPageButtonContainer").addClass("hide");
-
-    // if clientAmount is changed in cart
-    $(".cartItemQuantity").change(function(event) {
-        var target = event.target;
-        var name = $(target).parent(".cartProduct").find(".cartItemName").text();
-
-        // Object.keys(sessionStorage).forEach(function(product){
-
-        // })
-        var product = sessionStorage.getItem(name);
-        product = JSON.parse(product);
-        product["clientAmount"] = $(target).val();
-        if (product["clientAmount"] == "") product["clientAmount"] = "1";
-
-        sessionStorage.setItem(name, JSON.stringify(product));
-        drawModal(false);
-    });
 }
 // In Cart:
 $(".cartModal").click(function(event) {
@@ -211,7 +169,7 @@ $(".cartModal").click(function(event) {
             var successHtml = "<div class=\"successContainer\">" +
                 "<div class=\"row2\">У кошику нічого немає:(</div>" +
                 "</div>";
-            $(this).find(".modal-content").html(successHtml);
+            $(this).find(".modal-content").html(successHtml)
         } else {
             // if c;ient want to delete current product item
             if ($(target).is(".removeCartItemButton")) {
@@ -219,7 +177,6 @@ $(".cartModal").click(function(event) {
                 var nameToDelete = $(itemToDelete).find(".cartItemName").text();
                 sessionStorage.removeItem(nameToDelete);
                 $(itemToDelete).remove();
-                drawModal(false);
             }
             if ($(target).is(".checkout")) {
                 // close cart modal
@@ -227,25 +184,21 @@ $(".cartModal").click(function(event) {
                 // initialize checkout html that i will paste to checkoutModal
                 var checkoutHtml = "<div class=\"checkoutProducts\">";
                 // open products array in cart
-                for (var i = 0; i < sessionStorage.length; i++) {
-                    var itemJSON = sessionStorage.getItem(sessionStorage.key(i));
-
-                    var item = JSON.parse(itemJSON);
-                    var name = item.prodName;
-                    var price = item.prodPrice;
-                    var oldPrice = item.prodOldPrice;
-                    var expirationDate = item.prodExpirationDate;
-                    var meal_href = item.prodMeal_href
-                    var clientAmount = item.clientAmount;
-
+                var cartArray = addToSession();
+                // paste products from cart to checkout html
+                cartArray.forEach(function(element, index, arr) {
+                    var image = element[0];
+                    var name = element[1];
+                    var price = element[2];
+                    var code = element[3];
                     checkoutHtml += "<div class=\"checkoutProduct\">"
-                        // checkoutHtml += "<div class=\"imgContainer\">" +
-                        //     image +
-                        //     "</div>";
-                    checkoutHtml += "<p>" + name + "</p>";
-                    checkoutHtml += "<p>" + price + "</p>" +
+                    checkoutHtml += "<div class=\"imgContainer\">" +
+                        image +
                         "</div>";
-                }
+                    checkoutHtml += "<p>" + name + "</p>";
+                    checkoutHtml += "<p>" + price + "</p>";
+                    checkoutHtml += "<p>" + code + "</p></div>";
+                });
                 // add inputs of client's contact data to checkoutHtml
                 checkoutHtml += "</div>" + //end of "checkoutProducts div
                     "<div class=\"buyerData\">" +
@@ -255,9 +208,6 @@ $(".cartModal").click(function(event) {
                     "<input class=\"buyerEmail\" type=\"text\">" +
                     "<span>Ваш телефон:</span>" +
                     "<input class=\"buyerPhone\" type=\"text\">" +
-                    "<span>Адреса доставки:</span>" +
-                    "<input class=\"destinationPoint\" type=\"text\">" +
-                    "<span>Загальна ціна: <b>" + getCookie("totalPrice") + "</b></span>" +
                     "</div>";
                 checkoutHtml += "<div class=\"chekoutButtonContainer\">" +
                     "<button class=\"checkoutButton doubleDackerButton\">підтвердити замовлення</button>" +
@@ -269,57 +219,7 @@ $(".cartModal").click(function(event) {
             }
         }
     })
-    // authModal if user press .sign_inButton 
-$(".checkoutModal").click(function(event) {
-    var myModal = this;
-    var target = event.target;
-    // let's collect order details 
-    var checkoutData = collectCheckoutModal();
-    // let's create order
-    if ($(target).is(".checkoutButton")) {
-        // call to POST
-        $.ajax({
-            // url: "http://" + host + "/cloud-api/registration",
-            url: "http://" + host + ":8080/cloud-api/order/create",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify({
-                "name": checkoutData.name,
-                "userId": null, //getCookie("userId"),
-                "phone": checkoutData.phone,
-                "destinationPoint": checkoutData.destinationPoint,
-                "payment": getCookie("totalPrice"),
-                "idMealList": null,
-            }),
-            type: "POST",
-            crossDomain: true,
-            success: function() {
-                // close modal
-                sessionStorage.clear();
-                var successHtml = "<div class=\"successContainer\">" +
-                    "<div class=\"row2\">ми отримали Ваше замовлення :)</div>" +
-                    "</div>";
-                $(this).find(".modal-content").html(successHtml);
-                // // refresh products
-                // uploadProducts();
-            }
-        })
-    }
-});
-// collect product input data
-function collectCheckoutModal() {
-
-    // output array
-    var checkoutData = {};
-    checkoutData["name"] = $(".checkoutModal").find(".buyerName").val();
-    checkoutData["phone"] = $(".checkoutModal").find(".buyerPhone").val();
-    checkoutData["destinationPoint"] = $(".checkoutModal").find(".destinationPoint").val();
-
-    // return output productArray data
-    return checkoutData;
-}
-// Authorization madal
+    // Authorization madal
 function drawAuthModal() {
     var authHtml = "<div class=\"inputsData\">" +
         "<span>логін:</span>" +
@@ -365,7 +265,6 @@ function drawSignUpModal() {
 }
 
 closeCartButton.addEventListener("click", toggleCart);
-closeCheckoutButton.addEventListener("click", toggleCheckout);
 closeAuthButton.addEventListener("click", toggleAuth);
 closeSignUpButton.addEventListener("click", toggleSignUp);
 showCartButton.addEventListener("click", OpenCart);
@@ -549,8 +448,8 @@ $(".signUpModal").click(function(event) {
 
         // call to POST
         $.ajax({
-            // url: "http://" + host + "/cloud-api/registration",
-            url: "http://" + host + ":8080/cloud-api/registration",
+            url: "http://" + host + "/cloud-api/registration",
+            // url: "http://" + host + ":8080/cloud-api/registration",
             headers: {
                 'Content-Type': 'application/json'
             },
