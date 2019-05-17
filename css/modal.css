@@ -109,7 +109,7 @@ button.removeCartItemButton {
     width: 100%;
 }
 
-.checkout.doubleDackerButton {
+.checkoutButton.doubleDackerButton {
     color: #ff4d00;
 }
 
@@ -262,3 +262,4 @@ textarea {
         width: 50%;
     }
 }
+  

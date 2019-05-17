@@ -8,16 +8,16 @@ function uploadContent() {
         //   // тут замість app/selectFrom.php напиши адресу до свого серверу 
         //   // (що буде повертати адресу картинки у форматі json)
         // url: "http://" + host + "/cloud-api/meals",
-        url: "http://" + host + ":8080/cloud-api/meals",
+        url: "http://" + host + ":8080/cloud-api/meals/select",
 
         type: "GET",
         crossDomain: true,
-        success: function(data) {
+        success: function(content) {
 
-            var dataArray = []
-            var names = [];
+            // var dataArray = []
+            // var names = [];
 
-            content = data._embedded.meals;
+            // content = data._embedded.meals;
             // for (i in dataArray) {
             //     names.push(dataArray[i].name);
             // }
@@ -53,17 +53,28 @@ function displayContent(content) {
             productHtml += " <p class=\"name\">" + content[i].name + "</p>";
             productHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
             productHtml += " <p class=\"expirationDate\">" + content[i].expirationDate + "</p>";
-            productHtml += " <p class=\"meal_href hide\">" + content[i]._links.self.href + "</p>";
-            if (content[i].discount != null)
+            productHtml += " <p class=\"mealJSON hide\">" + JSON.stringify(content[i]) + "</p>";
+            if (content[i].discount != null && content[i].discount != 0) {
+                var old_price = parseFloat(content[i].price, 10);
+                // let's calculate new price
+                var real_discount = content[i].discount * 0.01;
+                var newPrice = old_price - old_price * real_discount;
+                // let's truncate
+                newPrice = Number((newPrice).toFixed(4)); // 6.7
                 productHtml += " <p class=\"discount \" title='знижка'>" +
 
-                "<span class=\"fa-stack fa-lg\">" +
-                "<i class=\"fa fa-certificate fa-stack-2x\"></i>" +
-                "<i class=\"fa fa-tag fa-stack-1x fa-inverse\"></i>" +
-                "</span> " +
-                "<span class=\"discountExactly\">" + content[i].discount + "</span> % </p>";
-            productHtml += " <p class=\"price\" title='ціна за шт'>" + content[i].price + "</p>";
+                    "<span class=\"fa-stack fa-lg\">" +
+                    "<i class=\"fa fa-certificate fa-stack-2x\"></i>" +
+                    "<i class=\"fa fa-tag fa-stack-1x fa-inverse\"></i>" +
+                    "</span> знижка " +
+                    "<span class=\"discountExactly\">" + content[i].discount + "</span> % </p>";
 
+                productHtml += " <p class=\"oldPrice\" title='стара ціна за шт'>" + content[i].price + "</p>" +
+                    " <p class=\"price newPrice\" title='ціна за шт'>" + newPrice + "</p>";
+
+            } else {
+                productHtml += " <p class=\"price\" title='ціна за шт'>" + content[i].price + "</p>";
+            }
             //   productHtml+=" <p class=\"price\">"+prices[i]+"</p>";
             //   productHtml+=" <p class=\"characteristics\" hidden>"+characteristics[i]+"</p>"
             productHtml += " <button class=\"cart\">у кошик <i class=\"fas fa-shopping-basket\"></i></button>";
