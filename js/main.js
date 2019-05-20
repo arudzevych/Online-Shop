@@ -196,3 +196,35 @@ $(".products").click(function(event) {
         uploadContent();
     }
 })
+
+// product serach
+$(".searchButton").click(function() {
+        // implement search
+        uploadContent();
+    }) //end of click
+
+$('.searchTerm').keypress(function(event) {
+    if (event.which == 13) {
+        // implement search
+        searchAction();
+    }
+});
+
+// implement search function
+function searchAction() {
+    // get .searchTerm text
+    var term = $(".searchTerm").val();
+    $(".product").each(function(index, value) {
+            // let's hide all of them
+            $(value).addClass("hide");
+            if (term != "") {
+                // get name
+                var prodName = $(value).find(".name").text();
+                //if term is substring of product name
+                if (prodName.toLowerCase().includes(term.toLowerCase())) {
+                    // then remove css class .hide
+                    $(value).removeClass("hide");
+                }
+            }
+        }) //end of each
+}
