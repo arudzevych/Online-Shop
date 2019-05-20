@@ -140,3 +140,59 @@ $(".addEditModal").click(function(event) {
         })
     }
 })
+
+
+// if client want to see product details:
+// open characteristics page when click on image
+$(".products").click(function(event) {
+        var target = event.target;
+        if ($(target).is(".name")) {
+
+
+            // find current .product div
+            var currProduct = $(target).parent(".product");
+            // find current image and it's name
+            // var image = $(currProduct).find("img")[0].outerHTML;
+            var name = $(currProduct).find(".name")[0].outerHTML;
+            var mealJSON = $(currProduct).find(".mealJSON").text();
+            var meal = JSON.parse(mealJSON);
+            // var currCharacteristicsJSON = $(currProduct).find(".characteristics").text();
+            // var currCharacteristics = JSON.parse(currCharacteristicsJSON);
+            var ingredients = meal.ingredients;
+            var ingredientsHtml = " ";
+            // left part page
+            ingredientsHtml += "<div class=\"characteristics-container\">";
+            ingredientsHtml += "<div class=\"left-charactersistics\">" +
+                "<button class=\"backButton\">назад</button>" +
+                // image +
+                "<b>" + name + "</b>" +
+                // "<p class=\"code\" hidden>" + code + "</p>" +
+                "</div>";
+            // Right part page
+            ingredientsHtml += "<div class=\"right-charactersistics\">" +
+                "<h3>Інгредієнти</h3>" +
+                "<ul>";
+            $(ingredients).each(function(index, element) {
+                ingredientsHtml += "<li>" + element.name + "</li>";
+            })
+            ingredientsHtml += "</ul>" +
+                "</div>" +
+                "</div>"; //end of .characteristics-container
+            // ingredientsHtml += "<div class=\"commentsDiv hide\"></div>"
+            // load characteristics content to .products div
+            $(".products").html(ingredientsHtml);
+            // hide search bar and .currentFilters div
+            // $(".wrap").addClass("hide");
+        }
+    })
+    // if user click on .backButton to back to main page
+$(".products").click(function(event) {
+    var target = event.target;
+    // if target is .backButton
+    if ($(target).is(".backButton")) {
+        // show search bar (.wrap), .filters div and .currentFilters div
+        // $(".wrap").removeClass("hide");
+        //  upload content to .products
+        uploadContent();
+    }
+})
