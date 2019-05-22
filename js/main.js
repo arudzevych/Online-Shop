@@ -33,12 +33,7 @@ function displayContent(content) {
     if (content[0] != null) {
         var productHtml = " ";
         var productsCount = content.length;
-        // var names = content[0];
-        // var codes = content[1];
-        // var images = content[2];
-        // var prices = content[3];
-        // var filters = content[4];
-        // var characteristics = content[5];
+
 
         var counter = 0; //row counter
         var countInRow = 2;
@@ -48,7 +43,14 @@ function displayContent(content) {
                 productHtml += "<div class=\"productRow\">";
 
             //   var filter = filters[i];
-            productHtml += "<div class=\"product\">"; //+images[i];
+            productHtml += "<div class=\"product\">";
+            //+images[i];
+            var imageHtml = "";
+            if (content[i].imageId != null) {
+                var source = "http://" + host + ":8080/cloud-api/images/" + content[i].imageId;
+                imageHtml = "<img src='" + source + "'>";
+            }
+            productHtml += imageHtml;
             //   productHtml+=" <p class=\"code\">"+codes[i]+"</p>";
             productHtml += " <p class=\"name\">" + content[i].name + "</p>";
             productHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
@@ -227,4 +229,20 @@ function searchAction() {
                 }
             }
         }) //end of each
+}
+
+// blob to html image
+function blobToHtmlImage(file_obj) {
+    var imageHtml = "";
+    if (file_obj != undefined && file_obj != "" && file_obj != null) {
+        if (file_obj.type.includes("image")) {
+
+            var source = window.webkitURL.createObjectURL(file_obj);
+            imageHtml = "<img src='" + source + "'>";
+
+            return imageHtml;
+        }
+    } else {
+        return "";
+    }
 }

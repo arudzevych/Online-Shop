@@ -360,7 +360,7 @@ button i {
     cursor: pointer;
 }
 
-@media screen and (min-width: 1020px) {
+@media screen and (min-width: 1024px) {
     /* @media screen and (min-width: 600px) { */
     /* for mainPageButton */
     .main-main-content-container {
