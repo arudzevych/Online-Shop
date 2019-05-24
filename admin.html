@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <!-- jQuery 3.3 -->
+    <script src="js/JQuery/jquery-3.2.1.js"></script>
+    <!--  ajax throught jquery-->
+    <script src="js/JQuery/Ajax/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/modalAdmin.css">
+    <link rel="shortcut icon" href="/cloud-ui/favicon.ico">
+    <!-- datepicker jquery -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="js/jquery.ui.datepicker-ua.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <!-- for copy paste images -->
+    <link rel="stylesheet" href="css/drag_and_drop.css">
+</head>
+
+<body>
+    <!-- buttons>>>>: -->
+    <!-- when user click this button all existed products are appiared -->
+    <button class="manageProducts hide">керувати товарами</button>
+    <!-- to add product user must click this button -->
+    <button class="addProduct">додати товар</button>
+    <!-- <<<<<buttons -->
+
+    <!-- div where admin can manage products -->
+    <div class="productManager">
+    </div>
+
+    <!-- Modal window -->
+    <div class="addEditModal modal">
+        <span class="close-button">&times;</span>
+        <div class="modal-content">
+        </div>
+    </div>
+    <!-- for auto resize text height equals it's content -->
+    <script src="js/autosize.min.js"></script>
+    <script type="text/javascript" src="js/admin.js"></script>
+    <script type="text/javascript" src="js/addEditModal.js"></script>
+    <script type="text/javascript">
+        window.onload = function() {
+            uploadProducts();
+        }
+    </script>
+</body>
+
+</html>

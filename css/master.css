@@ -26,6 +26,7 @@ body {
 
 .main-content-container {
     padding: 5px;
+    /* padding-top: 2vh; */
     width: 100%;
     height: 50%;
     display: flex;
@@ -66,6 +67,39 @@ body {
     /* font-family: 'Pacifico', 'regular'; */
     font-size: 3rem;
 }
+
+
+/* actions start >>> */
+
+.tabs {
+    margin-bottom: 2vw;
+}
+
+.tabs a span {
+    display: inline-block;
+    border-radius: 5px 5px 0 0;
+    /* width: 100px; */
+    color: black;
+    margin-right: 10px;
+    text-align: center;
+    background: rgb(171, 215, 226);
+    padding: 5px;
+}
+
+.tabs a span.active {
+    background: #f86627;
+}
+
+.tabs a span:hover {
+    background: rgb(180, 224, 235);
+}
+
+.tabs a span.active:hover {
+    background: #f86627;
+}
+
+
+/*<<< actions end */
 
 img {
     height: 40vw;
@@ -236,9 +270,9 @@ button i {
 .currentFilters {
     display: flex;
     flex-direction: column;
-    padding: 30px;
+    padding: 10px;
     font-size: 4rem;
-    margin-top: 20rem;
+    margin-top: 15rem;
 }
 
 .currentFilters span {
@@ -257,7 +291,7 @@ button i {
 
 .backButton {
     position: fixed;
-    top: 10vh;
+    top: 20vh;
     left: 10vw;
 }
 
@@ -320,7 +354,7 @@ button i {
     padding: 5px;
     outline: none;
     color: #000;
-    font-size: 4rem;
+    font-size: 2.5rem;
 }
 
 .searchTerm:focus {
@@ -359,7 +393,8 @@ button i {
     cursor: pointer;
 }
 
-@media screen and (min-width: 1020px) {
+@media screen and (min-width: 1024px) {
+    /* @media screen and (min-width: 600px) { */
     /* for mainPageButton */
     .main-main-content-container {
         width: 100%;
@@ -397,6 +432,27 @@ button i {
         /* font-family: 'Pacifico', 'regular'; */
         font-size: 3rem;
     }
+    /* actions start >>> */
+    .tabs a span {
+        display: inline-block;
+        border-radius: 5px 5px 0 0;
+        width: 100px;
+        color: black;
+        margin-right: 10px;
+        text-align: center;
+        background: rgb(171, 215, 226);
+        padding: 5px;
+    }
+    .tabs a span.active {
+        background: #f86627;
+    }
+    .tabs a span:hover {
+        background: rgb(180, 224, 235);
+    }
+    .tabs a span.active:hover {
+        background: #f86627;
+    }
+    /*<<< actions end */
     img {
         height: 20vw;
         width: auto;
@@ -456,6 +512,7 @@ button i {
         display: flex;
         justify-content: flex-end;
         right: 20px;
+        width: 30%;
     }
     .mainPageButton {
         display: block;
@@ -512,6 +569,9 @@ button i {
     .comments {
         display: block;
         margin-bottom: 20px;
+    }
+    .left-charactersistics {
+        padding-right: 200px;
     }
     .left-charactersistics,
     .right-charactersistics {

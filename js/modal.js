@@ -43,7 +43,11 @@ function AddToCart(product) {
         productData["prodOldPrice"] = $(product).find(".oldPrice").text();
         productData["prodExpirationDate"] = $(product).find(".expirationDate").text();
         productData["prodMealJSON"] = $(product).find(".mealJSON ").text();
-
+        if ($(product).find("img")[0] != undefined) {
+            productData["prodImage"] = $(product).find("img")[0].outerHTML;
+        } else {
+            productData["prodImage"] = "";
+        }
         // store product data to Session:
         // var productData = [prodName, prodPrice, prodExpirationDate, prodMealJSON];
         // open popup
@@ -164,7 +168,7 @@ function drawModal(toggleModal) {
         var oldPrice = item.prodOldPrice;
         var expirationDate = item.prodExpirationDate;
         var clientAmount = item.clientAmount;
-
+        var image = item.prodImage;
         // clientAmount increment
         if (clientAmount == undefined) clientAmount = 1;
 
@@ -175,9 +179,9 @@ function drawModal(toggleModal) {
 
 
         cartHtml += "<div class=\"cartProduct\">";
-        // cartHtml += "<div class=\"imgContainer\">" +
-        //     image +
-        //     "</div>"; //end of imgContainer
+        cartHtml += "<div class=\"imgContainer\">" +
+            image +
+            "</div>"; //end of imgContainer
         cartHtml += "<p class=cartItemName>" + name + "</p>";
         cartHtml += "<p>" + price + "</p>";
         cartHtml += "<p>" + expirationDate + "</p>";
@@ -255,14 +259,13 @@ $(".cartModal").click(function(event) {
                     var item = JSON.parse(itemJSON);
                     var name = item.prodName;
                     var price = item.prodPrice;
-                    // var oldPrice = item.prodOldPrice;
-                    // var expirationDate = item.prodExpirationDate;
-                    // var clientAmount = item.clientAmount;
+                    var image = item.prodImage;
 
-                    checkoutHtml += "<div class=\"checkoutProduct\">"
-                        // checkoutHtml += "<div class=\"imgContainer\">" +
-                        //     image +
-                        //     "</div>";
+
+                    checkoutHtml += "<div class=\"checkoutProduct\">";
+                    checkoutHtml += "<div class=\"imgContainer\">" +
+                        image +
+                        "</div>";
                     checkoutHtml += "<p>" + name + "</p>";
                     checkoutHtml += "<p>" + price + "</p>" +
                         "</div>";
@@ -492,7 +495,9 @@ function performLoginState() {
         $(".showAuthButton").html(showAuthButton);
         // hide user profile
         $(profileButton).hide();
-        // if user perform login
+        // show sign up button
+        $(showSignUpButton).show()
+            // if user perform login
     } else {
         // don't show user profile button if user is not logged in
         var checkloginState = checkLoginStateCookie();
@@ -503,7 +508,8 @@ function performLoginState() {
         $(".showAuthButton").html(showAuthButton);
         // show user profile
         $(profileButton).show();
-
+        // hide showSignUp button
+        $(showSignUpButton).hide()
     }
 }
 
@@ -516,6 +522,8 @@ function checkLoginStateCookie() {
         $(".showAuthButton").html(showAuthButton);
         // hide user profile
         $(profileButton).hide();
+        // show sign up button
+        $(showSignUpButton).show()
         return false;
         // logged
     } else {
@@ -523,6 +531,8 @@ function checkLoginStateCookie() {
         $(".showAuthButton").html(showAuthButton);
         // show user profile
         $(profileButton).show();
+        // hide show sign up button
+        $(showSignUpButton).hide();
         return true;
     }
 }
