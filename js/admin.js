@@ -19,6 +19,24 @@ function uploadProducts() {
     });
 }
 
+// initialize and upload forecast content 
+function uploadForcasteProducts() {
+    $.ajax({
+
+        // url: "http://" + host + "/cloud-api/meals/select",
+        url: "http://" + host + ":8080/cloud-api/meals/select",
+
+        type: "GET",
+        crossDomain: true,
+        success: function(dataArray) {
+
+            // let's display content
+            // displayAdminContent(dataArray);
+            alert("forecast");
+
+        }
+    });
+}
 // display products that market has
 function displayAdminContent(content) {
     if (content[0] != null) {
@@ -77,3 +95,5 @@ function convertToDate(timestamp) {
     var date = new Date(timestamp);
     return date;
 }
+
+$(".forecastProduct").click(uploadForcasteProducts);

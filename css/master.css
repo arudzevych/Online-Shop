@@ -75,26 +75,27 @@ body {
     margin-bottom: 2vw;
 }
 
-.tabs a span {
+.tabs button {
     display: inline-block;
     border-radius: 5px 5px 0 0;
     /* width: 100px; */
     color: black;
     margin-right: 10px;
+    margin-bottom: 2vw;
     text-align: center;
     background: rgb(171, 215, 226);
     padding: 5px;
 }
 
-.tabs a span.active {
+.tabs button.active {
     background: #f86627;
 }
 
-.tabs a span:hover {
+.tabs button:hover {
     background: rgb(180, 224, 235);
 }
 
-.tabs a span.active:hover {
+.tabs button.active:hover {
     background: #f86627;
 }
 
@@ -433,23 +434,23 @@ button i {
         font-size: 3rem;
     }
     /* actions start >>> */
-    .tabs a span {
+    .tabs button {
         display: inline-block;
         border-radius: 5px 5px 0 0;
-        width: 100px;
         color: black;
         margin-right: 10px;
+        margin-bottom: 0vw;
         text-align: center;
         background: rgb(171, 215, 226);
         padding: 5px;
     }
-    .tabs a span.active {
+    .tabs button.active {
         background: #f86627;
     }
-    .tabs a span:hover {
+    .tabs button:hover {
         background: rgb(180, 224, 235);
     }
-    .tabs a span.active:hover {
+    .tabs button.active:hover {
         background: #f86627;
     }
     /*<<< actions end */
@@ -458,7 +459,7 @@ button i {
         width: auto;
     }
     .products {
-        margin-top: 60px;
+        /* margin-top: 60px; */
         margin-left: 300px;
     }
     .products img {

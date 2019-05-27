@@ -51,7 +51,8 @@ function displayContent(content) {
             // let's perform autometed discount (by expiration day)===
             content[i] = checkNewDiscount(content[i]);
             // ====
-            //   productHtml+=" <p class=\"code\">"+codes[i]+"</p>";
+            // top sales parahraph
+            // productHtml += "<p><b>Топ продаж</b></p>";
             productHtml += " <p class=\"name\">" + content[i].name + "</p>";
             // productHtml += " <p class=\"amount\">" + content[i].amount + "</p>";
             productHtml += " <p class=\"expirationDate\">" + expiryDate + "</p>";
@@ -90,29 +91,6 @@ function displayContent(content) {
 
         $(".products").html(productHtml);
 
-        // tabs
-        //click tabs
-        $('.tabs a span').toArray().forEach(function(element) {
-            //создаем обработчик счелчков
-            $(element).on('click', function() {
-                var $element = $(element)
-                $('.tabs a span').removeClass("active");
-                $(element).addClass('active');
-                $('.tabs-content').empty();
-                if ($element.parent().is(":nth-child(1)")) {
-                    displayContent(hasDiscount);
-                } else {
-                    showDiscountedItems();
-                }
-                //return false so browser don't follow the link
-                return false;
-            })
-        })
-
-
-
-
-
         // add filters
         var filtersHtml = "";
         filtersHtml += "<span class=\"popularity\">popularity</span>";
@@ -120,8 +98,37 @@ function displayContent(content) {
     }
 
 }
-// /////////////////////////////////////////
-// filters in action
+
+$(".tabs").click(function(event) {
+        var target = event.target;
+        // if button is .main
+        if ($(target).is(".main")) {
+            // perform button activation
+            $('.tabs button').removeClass("active");
+            $(target).addClass('active');
+            // perform upload content
+            uploadContent();
+        }
+        // if button is .discounts
+        if ($(target).is(".discounts")) {
+            // perform button activation
+            $('.tabs button').removeClass("active");
+            $(target).addClass('active');
+            // perform show discounted products
+            showDiscountedItems();
+        }
+        // if button is .recommendations
+        if ($(target).is(".recommendations")) {
+            // perform button activation
+            $('.tabs button').removeClass("active");
+            $(target).addClass('active');
+            var emptyContent = [];
+            // perform show recommended products
+            showRecommendedItems();
+        }
+    })
+    // /////////////////////////////////////////
+    // filters in action
 $(".filters").click(function(event) {
         var target = event.target;
         // if user click on filter
@@ -196,6 +203,7 @@ $(".currentFilters").click(function(event) {
 });
 //   end filter section
 // ===================================================
+// show discounted products
 function showDiscountedItems() {
     $.ajax({
         // url: "http://" + host + "/cloud-api/meals/select",
@@ -215,6 +223,20 @@ function showDiscountedItems() {
 
             })
             displayContent(hasDiscount);
+        }
+    });
+}
+// show recommended products
+function showRecommendedItems() {
+    $.ajax({
+        // url: "http://" + host + "/cloud-api/meals/select",
+        url: "http://" + host + ":8080/cloud-api/meals/select",
+
+        type: "GET",
+        crossDomain: true,
+        success: function(content) {
+            var recommended = [];
+            displayContent(recommended);
         }
     });
 }
@@ -503,3 +525,9 @@ jQuery.fn.outerHTML = function(s) {
         this.before(s).remove() :
         jQuery("<p>").append(this.eq(0).clone()).html();
 };
+
+function addTopSalesIcon() {
+    topSalesIconHtml = "";
+    topSalesIconHtml = "<p><i class='fa fa-product-hunt'>Топ продажів</i></p>";
+    return topSalesIconHtml;
+}

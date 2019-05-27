@@ -496,8 +496,10 @@ function performLoginState() {
         // hide user profile
         $(profileButton).hide();
         // show sign up button
-        $(showSignUpButton).show()
-            // if user perform login
+        $(showSignUpButton).show();
+        // hide recommendations
+        $(".tabs .recommendations").hide();
+        // if user perform login
     } else {
         // don't show user profile button if user is not logged in
         var checkloginState = checkLoginStateCookie();
@@ -509,7 +511,9 @@ function performLoginState() {
         // show user profile
         $(profileButton).show();
         // hide showSignUp button
-        $(showSignUpButton).hide()
+        $(showSignUpButton).hide();
+        // show recommendations
+        $(".tabs .recommendations").show();
     }
 }
 
@@ -524,6 +528,8 @@ function checkLoginStateCookie() {
         $(profileButton).hide();
         // show sign up button
         $(showSignUpButton).show()
+            // hide recommendations
+        $(".tabs .recommendations").hide();
         return false;
         // logged
     } else {
@@ -533,6 +539,8 @@ function checkLoginStateCookie() {
         $(profileButton).show();
         // hide show sign up button
         $(showSignUpButton).hide();
+        // show recommendations
+        $(".tabs .recommendations").show();
         return true;
     }
 }
